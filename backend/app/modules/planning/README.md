@@ -1,0 +1,1 @@
+# Planning module\n\nGenerate a daily/multi-day study plan. Use the pure-Python planning engine in app/planning.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

@@ -1,0 +1,1 @@
+# Auth module\n\nRegistration, login, password hashing, JWT and protected endpoints. Implement before multi-user release.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

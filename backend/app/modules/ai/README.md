@@ -1,0 +1,1 @@
+# Ai module\n\nAI study analysis, predictions and personalized topic recommendations. Keep model output constrained and explainable.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

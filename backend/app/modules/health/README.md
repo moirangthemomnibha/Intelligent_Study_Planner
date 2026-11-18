@@ -1,0 +1,1 @@
+# Health module\n\nSimple status endpoint used to check whether the API is running.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

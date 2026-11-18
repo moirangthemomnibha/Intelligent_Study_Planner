@@ -1,0 +1,1 @@
+# Topics module\n\nTopics belong to subjects. Store estimated duration, difficulty, completion and confidence.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

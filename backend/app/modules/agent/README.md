@@ -1,0 +1,1 @@
+# Agent module\n\nAgentic study manager: inspect state, propose plans, call safe tools, log actions and request approval when needed.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

@@ -1,0 +1,1 @@
+# Subjects module\n\nSubjects, exam dates, importance/weight and links to the student.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

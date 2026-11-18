@@ -1,0 +1,1 @@
+# Students module\n\nStudent profile, available study hours, preferred study windows and constraints.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

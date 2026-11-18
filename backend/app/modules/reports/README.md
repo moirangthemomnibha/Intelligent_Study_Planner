@@ -1,0 +1,1 @@
+# Reports module\n\nExport weekly summaries, printable plans and progress reports.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n

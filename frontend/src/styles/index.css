@@ -1,0 +1,1351 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* =========================================
+   1. GLOBAL DESIGN SYSTEM
+========================================= */
+
+:root {
+  --pink-bg: #FFF5F7;
+  --pink-light: #F8DCE5;
+  --pink-medium: #D98FA5;
+  --pink-dark: #C87994;
+  --pink-soft: #FFF0F4;
+
+  --text-primary: #593B49;
+  --text-secondary: #75485A;
+  --text-muted: #A17D8C;
+
+  --white: #FFFFFF;
+  --border-color: #F8DCE5;
+
+  /* Global spacing */
+  --page-padding: 30px;
+  --card-padding: 28px;
+  --section-gap: 24px;
+  --form-gap: 20px;
+
+  /* Global dimensions */
+  --card-radius: 18px;
+  --input-radius: 9px;
+  --button-radius: 10px;
+
+  /* Shadows */
+  --card-shadow: 0 4px 18px #9d647512;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--pink-bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* =========================================
+   2. GLOBAL BUTTONS
+========================================= */
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--button-radius);
+  padding: 11px 16px;
+  background: var(--pink-medium);
+  color: white;
+  font-family: inherit;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+button:hover {
+  background: var(--pink-dark);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   3. GLOBAL FORM ELEMENTS
+========================================= */
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+input,
+select {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #D9C3CB;
+  border-radius: var(--input-radius);
+  background: white;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--pink-medium);
+  box-shadow: 0 0 0 3px #F8DCE5;
+}
+
+textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 12px;
+  border: 1px solid #EBCBD5;
+  border-radius: var(--input-radius);
+  resize: vertical;
+}
+
+/* =========================================
+   4. MAIN APPLICATION LAYOUT
+========================================= */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  padding: 0;
+}
+
+/* =========================================
+   5. LEFT SIDEBAR
+========================================= */
+
+.sidebar {
+  width: 250px;
+  min-width: 250px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+
+  background: white;
+  border-right: 1px solid var(--border-color);
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 20px 13px;
+
+  transition: width 0.3s ease, min-width 0.3s ease;
+
+  overflow-x: hidden;
+  z-index: 100;
+}
+
+.sidebar.collapsed {
+  width: 76px;
+  min-width: 76px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 5px 7px 25px;
+}
+
+.sidebar-logo {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.sidebar-toggle {
+  min-width: 38px;
+  height: 38px;
+  padding: 8px;
+
+  background: var(--pink-light);
+  color: var(--text-secondary);
+
+  font-size: 19px;
+}
+
+.sidebar-toggle:hover {
+  background: #EFC4D2;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  width: 100%;
+  min-height: 47px;
+
+  padding: 11px 13px;
+
+  background: transparent;
+  color: var(--text-secondary);
+
+  text-align: left;
+  white-space: nowrap;
+
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+  background: var(--pink-light);
+  color: #A94F70;
+}
+
+.sidebar-icon {
+  min-width: 25px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.sidebar-label {
+  font-size: 14px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 17px 5px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Collapsed sidebar */
+
+.sidebar.collapsed .sidebar-logo,
+.sidebar.collapsed .sidebar-label {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  padding: 11px 5px;
+}
+
+.sidebar.collapsed .sidebar-divider {
+  margin: 17px 0;
+}
+
+/* =========================================
+   6. MAIN CONTENT AREA
+========================================= */
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+
+  padding: var(--page-padding);
+
+  overflow-x: hidden;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: var(--section-gap);
+}
+
+.app-header h1 {
+  font-size: 23px;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.header-profile {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: var(--pink-light);
+  color: var(--text-secondary);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 19px;
+}
+
+/* =========================================
+   7. GLOBAL CARD DESIGN
+========================================= */
+
+.panel,
+.stat-card,
+.add-topic-panel,
+.syllabus-panel,
+.progress-panel {
+
+  background: var(--white);
+
+  padding: var(--card-padding);
+
+  border-radius: var(--card-radius);
+
+  box-shadow: var(--card-shadow);
+}
+
+.panel h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 28px;
+  margin: 12px 0;
+  color: var(--pink-dark);
+}
+
+/* =========================================
+   8. DASHBOARD
+========================================= */
+
+.dashboard {
+  max-width: 1450px;
+  margin: auto;
+}
+
+.welcome-banner {
+  background: var(--pink-light);
+
+  padding: 25px;
+
+  border-radius: var(--card-radius);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 25px;
+  flex-wrap: wrap;
+
+  margin-bottom: var(--section-gap);
+}
+
+.welcome-banner h2 {
+  font-size: 25px;
+  margin: 0 0 8px;
+}
+
+.date-card,
+.goal-card {
+  background: white;
+  padding: 18px;
+  border-radius: 13px;
+}
+
+.goal-card {
+  min-width: 220px;
+}
+
+/* Dashboard statistics */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: var(--section-gap);
+
+  margin-bottom: var(--section-gap);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: var(--section-gap);
+}
+
+/* Dashboard schedule */
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 25px;
+
+  gap: 10px;
+
+  padding: 14px 0;
+
+  border-bottom: 1px solid var(--border-color);
+
+  font-size: 13px;
+  align-items: center;
+}
+
+/* Dashboard progress circle */
+
+.progress-circle {
+  width: 155px;
+  height: 155px;
+
+  margin: 20px auto;
+
+  border-radius: 50%;
+
+  background: conic-gradient(
+    var(--pink-medium) 0%,
+    var(--pink-light) 0%
+  );
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+}
+
+.progress-circle::before {
+  content: "";
+
+  position: absolute;
+
+  width: 125px;
+  height: 125px;
+
+  background: white;
+
+  border-radius: 50%;
+}
+
+.progress-circle strong,
+.progress-circle span {
+  position: relative;
+  z-index: 1;
+}
+
+.progress-circle strong {
+  font-size: 28px;
+  color: #704657;
+}
+
+.progress-circle span {
+  font-size: 15px;
+  color: #704657;
+}
+
+.progress-legend {
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Other dashboard components */
+
+.assessment-item {
+  padding: 15px;
+
+  background: var(--pink-bg);
+
+  border-radius: 10px;
+
+  margin-bottom: 12px;
+}
+
+.assessment-item span {
+  float: right;
+  color: var(--pink-dark);
+  font-size: 12px;
+}
+
+.subject-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 45px;
+
+  align-items: center;
+  gap: 12px;
+
+  margin: 18px 0;
+
+  font-size: 13px;
+}
+
+.progress-track {
+  height: 9px;
+
+  background: var(--pink-light);
+
+  border-radius: 20px;
+  overflow: hidden;
+
+  margin: 9px 0;
+}
+
+.progress-track div {
+  height: 100%;
+  background: var(--pink-medium);
+  border-radius: 20px;
+}
+
+.priorities li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.priorities li span {
+  float: right;
+  color: var(--pink-dark);
+  font-size: 12px;
+}
+
+.recommendation {
+  background: var(--pink-soft);
+
+  padding: 15px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-actions button {
+  text-align: left;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+/* =========================================
+   9. PLANNER PAGE
+========================================= */
+
+/* Overall syllabus progress */
+
+.progress-panel {
+  padding: var(--card-padding);
+  text-align: center;
+  margin-bottom: var(--section-gap);
+}
+
+.planner-statistics {
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  width: 100%;
+
+  text-align: center;
+
+  gap: 15px;
+
+  margin-top: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-item strong {
+  font-size: 25px;
+  font-weight: 700;
+  color: #704657;
+}
+
+.stat-item span {
+  font-size: 16px;
+  color: #704657;
+}
+
+/* Planner section spacing */
+
+.add-topic-panel,
+.syllabus-panel {
+  padding: var(--card-padding);
+  margin-bottom: var(--section-gap);
+  border-radius: var(--card-radius);
+}
+
+/* Planner section headings */
+
+.add-topic-panel h2,
+.syllabus-panel h2,
+.add-topic-panel h3,
+.syllabus-panel h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+/* Topic form */
+
+.topic-form {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 22px 25px;
+
+  margin-top: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
+
+  margin-bottom: 5px;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: var(--input-radius);
+}
+
+/* Add topic button */
+
+.topic-form button {
+  justify-self: start;
+  align-self: end;
+  min-height: 44px;
+}
+
+/* Syllabus checklist */
+
+.topic-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+
+  margin-top: 20px;
+}
+
+.subject-topic-group {
+  margin-bottom: 25px;
+  padding: 20px;
+
+  border-radius: 12px;
+
+  background: var(--pink-bg);
+}
+
+.subject-topic-group h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.subject-topic-group label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 10px;
+
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* =========================================
+   10. GENERATE STUDY PLAN
+========================================= */
+
+/* Main generation section */
+
+.generate-plan-panel {
+  background: white;
+
+  padding: var(--card-padding);
+
+  border-radius: var(--card-radius);
+
+  box-shadow: var(--card-shadow);
+
+  margin-bottom: var(--section-gap);
+}
+
+/* Section heading */
+
+.generate-plan-panel h2,
+.generate-plan-panel h3 {
+  margin-top: 0;
+  margin-bottom: 22px;
+}
+
+/* Study plan form */
+
+.generate-plan-panel form,
+.study-plan-form {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 22px 25px;
+
+  align-items: end;
+}
+
+/* Labels */
+
+.generate-plan-panel label,
+.study-plan-form label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
+
+  font-weight: 600;
+}
+
+/* Inputs */
+
+.generate-plan-panel input,
+.study-plan-form input {
+  width: 100%;
+  min-height: 46px;
+}
+
+/* Generate button */
+
+.generate-plan-panel button,
+.study-plan-form button {
+  min-height: 46px;
+  padding: 12px 22px;
+  justify-self: start;
+}
+
+/* =========================================
+   11. MY STUDY SESSIONS
+========================================= */
+
+.study-sessions-panel {
+  background: white;
+
+  padding: var(--card-padding);
+
+  border-radius: var(--card-radius);
+
+  box-shadow: var(--card-shadow);
+
+  margin-bottom: var(--section-gap);
+}
+
+.study-sessions-panel h2,
+.study-sessions-panel h3 {
+  margin-top: 0;
+  margin-bottom: 22px;
+}
+
+/* Session list */
+
+.study-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Individual session cards */
+
+.study-session-card {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 20px;
+
+  background: var(--pink-bg);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 14px;
+
+  transition: 0.2s ease;
+}
+
+.study-session-card:hover {
+  border-color: var(--pink-medium);
+}
+
+/* Session information */
+
+.session-details {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  min-width: 0;
+}
+
+.session-details h4 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.session-details p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Session status */
+
+.session-status {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 12px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.session-status.pending {
+  background: #FFF0D6;
+  color: #946B28;
+}
+
+.session-status.completed {
+  background: #E4F5E8;
+  color: #347A45;
+}
+
+.session-status.missed {
+  background: #FCE5E8;
+  color: #B34D60;
+}
+
+/* Session action buttons */
+
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.session-actions button {
+  min-height: 40px;
+  font-size: 12px;
+}
+
+/* =========================================
+   12. EMPTY STATES
+========================================= */
+
+.empty-state {
+  padding: 30px 20px;
+
+  text-align: center;
+
+  background: var(--pink-bg);
+
+  border: 1px dashed #EBCBD5;
+
+  border-radius: 12px;
+
+  color: var(--text-muted);
+
+  line-height: 1.7;
+}
+
+/* =========================================
+   13. RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 1100px) {
+
+  :root {
+    --page-padding: 22px;
+    --card-padding: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+@media (max-width: 900px) {
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topic-form {
+    grid-template-columns: 1fr;
+  }
+
+  .generate-plan-panel form,
+  .study-plan-form {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  :root {
+    --page-padding: 18px;
+    --card-padding: 20px;
+    --section-gap: 20px;
+  }
+
+  .planner-statistics {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 22px;
+  }
+
+  .study-session-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .session-actions {
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .sidebar {
+    width: 76px;
+    min-width: 76px;
+  }
+
+  .sidebar-logo,
+  .sidebar-label {
+    display: none;
+  }
+
+  .sidebar-link {
+    justify-content: center;
+    padding: 11px 5px;
+  }
+
+  .main-content {
+    padding: 16px 12px;
+  }
+
+  .app-header h1 {
+    font-size: 17px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-banner {
+    padding: 18px;
+  }
+
+  .schedule-row {
+    grid-template-columns: 85px 1fr 20px;
+    font-size: 11px;
+  }
+
+  .study-session-card {
+    padding: 16px;
+  }
+
+  .session-actions button {
+    flex: 1;
+  }
+
+  .progress-circle {
+    width: 140px;
+    height: 140px;
+  }
+
+  .progress-circle::before {
+    width: 112px;
+    height: 112px;
+  }
+
+}
+
+/* =========================================
+   PLANNER PAGE HEADER
+========================================= */
+
+.planner-page-header {
+  margin-bottom: 24px;
+}
+
+.planner-page-header h1 {
+  font-size: 32px;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+
+.planner-page-header p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.section-heading {
+  margin-bottom: 25px;
+}
+
+.section-heading h2 {
+  margin-bottom: 8px;
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* =========================================
+   GENERATE STUDY PLAN FORM
+========================================= */
+
+.generate-plan-panel {
+  padding: 32px !important;
+  margin-bottom: 24px;
+}
+
+.study-plan-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 30px;
+  align-items: end;
+}
+
+.study-plan-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.study-plan-form .form-group label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.input-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.input-with-unit input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+}
+
+.input-with-unit span {
+  min-width: 65px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.generate-button-wrapper {
+  grid-column: 1 / -1;
+  margin-top: 5px;
+}
+
+.generate-plan-button {
+  min-height: 46px;
+  padding: 12px 25px;
+}
+
+/* =========================================
+   MY STUDY SESSIONS
+========================================= */
+
+.study-sessions-panel {
+  padding: 32px !important;
+  margin-bottom: 24px;
+}
+
+.study-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.study-session-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+
+  padding: 24px;
+
+  background: var(--pink-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+
+  transition: border-color 0.2s ease;
+}
+
+.study-session-card:hover {
+  border-color: var(--pink-medium);
+}
+
+.session-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.session-details h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.session-subject {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.session-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+.session-status {
+  padding: 7px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.session-status.pending {
+  background: #FFF0D6;
+  color: #946B28;
+}
+
+.session-status.completed {
+  background: #E4F5E8;
+  color: #347A45;
+}
+
+.session-status.missed {
+  background: #FCE5E8;
+  color: #B34D60;
+}
+
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.session-actions button {
+  min-height: 40px;
+  font-size: 13px;
+}
+
+.session-actions .missed-button {
+  background: #F2DCE2;
+  color: #925269;
+}
+
+.session-actions .missed-button:hover {
+  background: #EBC4D0;
+}
+
+/* =========================================
+   EMPTY STATES
+========================================= */
+
+.empty-state {
+  padding: 30px;
+  text-align: center;
+  background: var(--pink-bg);
+  border: 1px dashed #EBCBD5;
+  border-radius: 14px;
+  color: var(--text-muted);
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+  margin-top: 0;
+}
+
+.empty-state p {
+  margin-bottom: 0;
+  line-height: 1.7;
+}
+
+/* =========================================
+   ERROR AND SUCCESS MESSAGES
+========================================= */
+
+.error-message,
+.success-message {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.error-message {
+  background: #FCE5E8;
+  color: #A33D52;
+}
+
+.success-message {
+  background: #E4F5E8;
+  color: #347A45;
+}
+
+/* =========================================
+   RESPONSIVE PLANNER
+========================================= */
+
+@media (max-width: 768px) {
+
+  .study-plan-form {
+    grid-template-columns: 1fr;
+  }
+
+  .generate-button-wrapper {
+    grid-column: auto;
+  }
+
+  .study-session-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .session-right {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .session-actions {
+    width: 100%;
+  }
+
+  .session-actions button {
+    flex: 1;
+  }
+
+  .planner-page-header h1 {
+    font-size: 26px;
+  }
+
+  .generate-plan-panel,
+  .study-sessions-panel {
+    padding: 22px !important;
+  }
+
+}
+
+/* =========================================
+   GENERATE BUTTON - CLICK FIX
+========================================= */
+
+.generate-button-wrapper {
+  position: relative;
+  z-index: 20;
+  display: block;
+  pointer-events: auto;
+}
+
+.generate-plan-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+  z-index: 21;
+
+  pointer-events: auto !important;
+  cursor: pointer !important;
+
+  min-height: 48px;
+  padding: 12px 25px;
+
+  background: #D98FA5 !important;
+  color: #FFFFFF !important;
+
+  border: none;
+  border-radius: 10px;
+
+  opacity: 1 !important;
+}
+
+.generate-plan-button:hover {
+  background: #C87994 !important;
+}
+
+.generate-plan-button:disabled {
+  cursor: wait !important;
+  opacity: 0.7 !important;
+}

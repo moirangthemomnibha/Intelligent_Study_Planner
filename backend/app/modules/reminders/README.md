@@ -1,0 +1,1 @@
+# Reminders module\n\nIn-app/email reminders for sessions, revision and approaching deadlines.\n\nTypical flow: router validates the request -> service performs the work -> model/schema defines stored and exchanged data. Keep business logic in `service.py`.\n
