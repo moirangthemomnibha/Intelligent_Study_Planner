@@ -1349,3 +1349,1305 @@ textarea {
   cursor: wait !important;
   opacity: 0.7 !important;
 }
+
+/* WEEKLY PREFERRED STUDY TIME */
+
+.preferred-time-panel {
+  margin-bottom: 24px;
+}
+
+.preferred-time-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+  border-radius: 12px;
+}
+
+.preferred-time-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 4px;
+  text-align: center;
+}
+
+.preferred-time-table th {
+  padding: 10px 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: #593B49;
+}
+
+.preferred-time-table td {
+  padding: 3px;
+}
+
+.preferred-time-slot {
+  width: 32px;
+  height: 34px;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: #000000;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+}
+
+.preferred-time-slot:hover {
+  background: #FFFFFF;
+  border-color: #999999;
+}
+
+.preferred-time-slot.selected {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  color: #000000;
+}
+
+.preferred-time-panel > button {
+  margin-top: 12px;
+}
+
+/* =================================
+   POMODORO TIMER
+================================= */
+
+.pomodoro-panel {
+  text-align: center;
+  padding: 35px 30px;
+}
+
+.pomodoro-modes {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 25px 0 35px;
+}
+
+.pomodoro-modes button {
+  border: none;
+  border-radius: 25px;
+  padding: 11px 22px;
+  background: #FCE8EE;
+  color: #92576C;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pomodoro-modes button.active {
+  background: #D98FA5;
+  color: white;
+}
+
+.pomodoro-circle-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+}
+
+.pomodoro-circle {
+  width: 290px;
+  height: 290px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: conic-gradient(
+    #D98FA5 var(--timer-progress),
+    #F8DCE5 var(--timer-progress)
+  );
+
+  transition: background 0.3s ease;
+}
+
+.pomodoro-circle-inner {
+  width: 255px;
+  height: 255px;
+  border-radius: 50%;
+  background: #FFFFFF;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomodoro-time {
+  font-size: 62px;
+  font-weight: 700;
+  color: #593B49;
+  letter-spacing: 2px;
+}
+
+.pomodoro-mode-label {
+  margin-top: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #A76B80;
+}
+
+.pomodoro-label {
+  color: #92576C;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.pomodoro-session-select {
+  max-width: 600px;
+  margin: 25px auto;
+  text-align: left;
+}
+
+.pomodoro-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  margin: 25px 0 10px;
+}
+
+.pomodoro-controls button {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pomodoro-reset,
+.pomodoro-skip {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #E9C3D0;
+  background: #FFF5F7;
+  color: #B8758D;
+  font-size: 23px;
+}
+
+.pomodoro-play {
+  width: 68px;
+  height: 68px;
+  border: 2px solid #D98FA5;
+  background: #FFFFFF;
+  color: #D98FA5;
+  font-size: 27px;
+}
+
+.pomodoro-controls button:hover {
+  background: #F8DCE5;
+  transform: scale(1.06);
+}
+
+.pomodoro-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .pomodoro-circle {
+    width: 240px;
+    height: 240px;
+  }
+
+  .pomodoro-circle-inner {
+    width: 210px;
+    height: 210px;
+  }
+
+  .pomodoro-time {
+    font-size: 48px;
+  }
+
+  .pomodoro-modes button {
+    padding: 9px 13px;
+    font-size: 12px;
+  }
+}
+
+.break-settings {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+  margin: 20px 0;
+  align-items: end;
+}
+
+.break-settings .form-group {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.break-settings .form-group input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 650px) {
+  .break-settings {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.pomodoro-panel .break-settings {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 24px;
+  width: 100%;
+  align-items: center;
+  margin: 25px 0;
+}
+
+.pomodoro-panel .break-settings .form-group {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.pomodoro-panel .break-settings input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 650px) {
+  .pomodoro-panel .break-settings {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 18px 14px;
+  border-top: 1px solid #F3DCE4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-bottom .sidebar-link {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-bottom .sidebar-link:hover {
+  background: #FFF0F4;
+  transform: translateX(3px);
+}
+
+.sidebar-bottom .sidebar-link.active {
+  background: #F8DCE6;
+  color: #BD6685;
+  font-weight: 700;
+}
+
+:root {
+  --accent-color: #D98FA5;
+  --accent-hover: #C87994;
+  --app-font-size: 15px;
+}
+
+/* =====================================================
+   INTELLIGENT ADAPTIVE STUDY PLANNER
+   CENTRALIZED EYE-COMFORTABLE THEME SYSTEM
+===================================================== */
+
+/* =====================================================
+   1. LIGHT THEME
+===================================================== */
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Main surfaces */
+  --app-background: #FFF7F9;
+  --app-sidebar: #FCEEF2;
+  --app-card: #FFFFFF;
+  --app-card-secondary: #FFF1F5;
+  --app-input: #FFFBFC;
+
+  /* Grid and sub-boundaries */
+  --app-grid-background: #FFF1F5;
+  --app-grid-line: #EBD9E1;
+  --app-grid-hover: #F8E5EB;
+  --app-grid-selected: #EBC3D1;
+
+  /* Typography */
+  --app-text: #49323D;
+  --app-text-secondary: #745563;
+  --app-muted: #927985;
+
+  /* Borders */
+  --app-border: #EBD9E0;
+
+  /* Accent */
+  --app-accent: #C66F91;
+  --app-accent-hover: #AD587B;
+  --app-button-text: #FFFFFF;
+
+  /* Progress indicators */
+  --app-progress-track: #F0DDE4;
+  --app-progress-fill: #B95F83;
+  --app-progress-text: #49323D;
+
+  /* Shadows */
+  --app-shadow: 0 4px 18px rgba(110, 65, 83, 0.07);
+
+  /* Legacy variable compatibility */
+  --pink-bg: var(--app-background);
+  --pink-light: var(--app-card-secondary);
+  --pink-medium: var(--app-accent);
+  --pink-dark: var(--app-accent-hover);
+  --pink-soft: var(--app-card-secondary);
+
+  --text-primary: var(--app-text);
+  --text-secondary: var(--app-text-secondary);
+  --text-muted: var(--app-muted);
+
+  --white: var(--app-card);
+  --border-color: var(--app-border);
+  --card-shadow: var(--app-shadow);
+}
+
+
+/* =====================================================
+   2. DARK THEME
+===================================================== */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Main surfaces */
+  --app-background: #211B20;
+  --app-sidebar: #292129;
+  --app-card: #302630;
+  --app-card-secondary: #382B35;
+  --app-input: #40313B;
+
+  /* Grid and sub-boundaries */
+  --app-grid-background: #292129;
+  --app-grid-line: #493944;
+  --app-grid-hover: #453441;
+  --app-grid-selected: #644253;
+
+  /* Typography */
+  --app-text: #F7EDF2;
+  --app-text-secondary: #D9C5CF;
+  --app-muted: #B49EAA;
+
+  /* Borders */
+  --app-border: #493944;
+
+  /* Accent */
+  --app-accent: #E5A0BA;
+  --app-accent-hover: #F0B6CA;
+  --app-button-text: #30212A;
+
+  /* Progress indicators */
+  --app-progress-track: #493541;
+  --app-progress-fill: #E5A0BA;
+  --app-progress-text: #F7EDF2;
+
+  /* Shadows */
+  --app-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
+
+  /* Legacy variable compatibility */
+  --pink-bg: var(--app-background);
+  --pink-light: var(--app-card-secondary);
+  --pink-medium: var(--app-accent);
+  --pink-dark: var(--app-accent-hover);
+  --pink-soft: var(--app-card-secondary);
+
+  --text-primary: var(--app-text);
+  --text-secondary: var(--app-text-secondary);
+  --text-muted: var(--app-muted);
+
+  --white: var(--app-card);
+  --border-color: var(--app-border);
+  --card-shadow: var(--app-shadow);
+}
+
+
+/* =====================================================
+   3. GLOBAL APPLICATION
+===================================================== */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--app-background);
+  color: var(--app-text);
+  font-size: var(--app-font-size, 15px);
+}
+
+[data-theme] {
+  color: var(--app-text);
+}
+
+[data-theme] .app-shell,
+[data-theme] .main-content {
+  background: var(--app-background);
+  color: var(--app-text);
+}
+
+
+/* =====================================================
+   4. SIDEBAR
+===================================================== */
+
+[data-theme] .sidebar {
+  background: var(--app-sidebar);
+  border-color: var(--app-border);
+}
+
+[data-theme] .sidebar-logo,
+[data-theme] .sidebar-link {
+  color: var(--app-text);
+}
+
+[data-theme] .sidebar-link:hover,
+[data-theme] .sidebar-link.active {
+  background: var(--app-card-secondary);
+  color: var(--app-accent-hover);
+}
+
+[data-theme] .sidebar-divider {
+  background: var(--app-border);
+}
+
+[data-theme] .sidebar-bottom {
+  border-color: var(--app-border);
+}
+
+[data-theme] .sidebar-toggle {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+}
+
+
+/* =====================================================
+   5. HEADER
+===================================================== */
+
+[data-theme] .app-header h1,
+[data-theme] .planner-page-header h1 {
+  color: var(--app-text);
+}
+
+[data-theme] .header-profile {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+}
+
+
+/* =====================================================
+   6. CARDS AND PANELS
+===================================================== */
+
+[data-theme] .panel,
+[data-theme] .stat-card,
+[data-theme] .add-topic-panel,
+[data-theme] .syllabus-panel,
+[data-theme] .progress-panel,
+[data-theme] .generate-plan-panel,
+[data-theme] .study-sessions-panel,
+[data-theme] .preferred-time-panel,
+[data-theme] .pomodoro-panel {
+  background: var(--app-card);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+[data-theme] main h1,
+[data-theme] main h2,
+[data-theme] main h3,
+[data-theme] main h4,
+[data-theme] main h5 {
+  color: var(--app-text);
+}
+
+[data-theme] main p,
+[data-theme] main label,
+[data-theme] main .muted {
+  color: var(--app-text-secondary);
+}
+
+
+/* =====================================================
+   7. INPUTS
+===================================================== */
+
+[data-theme] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme] select,
+[data-theme] textarea {
+  background: var(--app-input);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+}
+
+[data-theme] input::placeholder,
+[data-theme] textarea::placeholder {
+  color: var(--app-muted);
+  opacity: 1;
+}
+
+[data-theme] option {
+  background: var(--app-card);
+  color: var(--app-text);
+}
+
+[data-theme] input:focus,
+[data-theme] select:focus,
+[data-theme] textarea:focus {
+  border-color: var(--app-accent);
+  box-shadow: 0 0 0 3px var(--app-grid-hover);
+}
+
+[data-theme] input[type="checkbox"] {
+  accent-color: var(--app-accent);
+}
+
+
+/* =====================================================
+   8. BUTTONS
+===================================================== */
+
+[data-theme] button:not(.sidebar-link) {
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+[data-theme] .generate-plan-button,
+[data-theme] .save-settings-btn,
+[data-theme] .profile-edit-btn,
+[data-theme] .profile-save-btn {
+  background: var(--app-accent);
+  color: var(--app-button-text);
+}
+
+[data-theme] .generate-plan-button:hover,
+[data-theme] .save-settings-btn:hover,
+[data-theme] .profile-edit-btn:hover,
+[data-theme] .profile-save-btn:hover {
+  background: var(--app-accent-hover);
+}
+
+
+/* =====================================================
+   9. DASHBOARD
+===================================================== */
+
+[data-theme] .welcome-banner {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+}
+
+[data-theme] .date-card,
+[data-theme] .goal-card {
+  background: var(--app-card);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+}
+
+[data-theme] .assessment-item,
+[data-theme] .recommendation {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+}
+
+[data-theme] .assessment-item span,
+[data-theme] .priorities li span {
+  color: var(--app-accent);
+}
+
+/* Dashboard progress circle */
+
+[data-theme] .progress-circle {
+  background: conic-gradient(
+    var(--app-progress-fill) 0%,
+    var(--app-progress-track) 0%
+  );
+}
+
+[data-theme] .progress-circle::before {
+  background: var(--app-card);
+}
+
+[data-theme] .progress-circle strong,
+[data-theme] .progress-circle span {
+  color: var(--app-progress-text);
+}
+
+[data-theme] .progress-track {
+  background: var(--app-progress-track);
+}
+
+[data-theme] .progress-track div {
+  background: var(--app-progress-fill);
+}
+
+[data-theme] .stat-card strong {
+  color: var(--app-accent-hover);
+}
+
+[data-theme] .schedule-row,
+[data-theme] .priorities li {
+  border-color: var(--app-border);
+}
+
+
+/* =====================================================
+   10. SUBJECTS AND TASKS
+===================================================== */
+
+[data-theme] [class*="subject-card"],
+[data-theme] [class*="subject-item"],
+[data-theme] [class*="task-card"],
+[data-theme] [class*="task-item"],
+[data-theme] [class*="task-summary"] {
+  background: var(--app-card);
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+[data-theme] [class*="subject"] h1,
+[data-theme] [class*="subject"] h2,
+[data-theme] [class*="subject"] h3,
+[data-theme] [class*="subject"] p,
+[data-theme] [class*="subject"] span,
+[data-theme] [class*="task"] h1,
+[data-theme] [class*="task"] h2,
+[data-theme] [class*="task"] h3,
+[data-theme] [class*="task"] p {
+  color: var(--app-text);
+}
+
+
+/* =====================================================
+   11. PLANNER AND STUDY SESSIONS
+===================================================== */
+
+[data-theme] .subject-topic-group,
+[data-theme] .study-session-card,
+[data-theme] .empty-state {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+}
+
+[data-theme] .subject-topic-group h3,
+[data-theme] .session-details h3,
+[data-theme] .empty-state h3 {
+  color: var(--app-text);
+}
+
+[data-theme] .session-details p,
+[data-theme] .session-meta,
+[data-theme] .empty-state p {
+  color: var(--app-text-secondary);
+}
+
+[data-theme] .study-session-card:hover {
+  border-color: var(--app-accent);
+}
+
+[data-theme] .empty-state {
+  border-style: dashed;
+}
+
+
+/* =====================================================
+   12. GRID AND SUB-BOUNDARY DESIGN
+===================================================== */
+
+/* Preferred study time grid */
+
+[data-theme] .preferred-time-wrapper {
+  background: var(--app-grid-background);
+  border: 1px solid var(--app-grid-line);
+}
+
+[data-theme] .preferred-time-table {
+  background: var(--app-grid-background);
+}
+
+[data-theme] .preferred-time-table th {
+  background: var(--app-grid-background);
+  color: var(--app-text);
+}
+
+[data-theme] .preferred-time-table td {
+  background: var(--app-grid-background);
+}
+
+[data-theme] .preferred-time-slot {
+  background: var(--app-grid-background);
+  color: var(--app-text);
+  border: 1px solid var(--app-grid-line);
+}
+
+[data-theme] .preferred-time-slot:hover {
+  background: var(--app-grid-hover);
+  border-color: var(--app-accent);
+}
+
+[data-theme] .preferred-time-slot.selected {
+  background: var(--app-grid-selected);
+  color: var(--app-text);
+  border: 1px solid var(--app-accent);
+}
+
+/* General tables and subdivisions */
+
+[data-theme] table {
+  color: var(--app-text);
+}
+
+[data-theme] th,
+[data-theme] td {
+  border-color: var(--app-grid-line);
+}
+
+[data-theme] tr {
+  border-color: var(--app-grid-line);
+}
+
+
+/* =====================================================
+   13. POMODORO TIMER
+===================================================== */
+
+[data-theme] .pomodoro-modes button {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+}
+
+[data-theme] .pomodoro-modes button.active {
+  background: var(--app-accent);
+  color: var(--app-button-text);
+}
+
+[data-theme] .pomodoro-circle {
+  background: conic-gradient(
+    var(--app-progress-fill) var(--timer-progress),
+    var(--app-progress-track) var(--timer-progress)
+  );
+}
+
+[data-theme] .pomodoro-circle-inner {
+  background: var(--app-card);
+}
+
+[data-theme] .pomodoro-time {
+  color: var(--app-text);
+}
+
+[data-theme] .pomodoro-mode-label,
+[data-theme] .pomodoro-label {
+  color: var(--app-text-secondary);
+}
+
+[data-theme] .pomodoro-play,
+[data-theme] .pomodoro-reset,
+[data-theme] .pomodoro-skip {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+
+/* =====================================================
+   14. PROFILE
+===================================================== */
+
+[data-theme] .profile-page {
+  background: var(--app-card);
+  color: var(--app-text);
+}
+
+[data-theme] .profile-header h1 {
+  color: var(--app-text);
+}
+
+[data-theme] .profile-header p {
+  color: var(--app-text-secondary);
+}
+
+[data-theme] .profile-card {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+}
+
+[data-theme] .profile-card h2,
+[data-theme] .profile-card h3,
+[data-theme] .profile-card p,
+[data-theme] .profile-card label,
+[data-theme] .profile-card span,
+[data-theme] .profile-card strong {
+  color: var(--app-text);
+}
+
+[data-theme] .profile-card input,
+[data-theme] .profile-card select {
+  background: var(--app-input);
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+[data-theme] .profile-avatar {
+  background: var(--app-accent);
+  color: var(--app-button-text);
+}
+
+[data-theme] .profile-progress .progress-track {
+  background: var(--app-progress-track);
+}
+
+[data-theme] .profile-progress .progress-fill {
+  background: var(--app-progress-fill);
+}
+
+[data-theme] .profile-cancel-btn {
+  background: var(--app-card-secondary);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+}
+
+
+/* =====================================================
+   15. STATUS MESSAGES
+===================================================== */
+
+[data-theme] .error-message {
+  background: #FCE5E8;
+  color: #963D51;
+}
+
+[data-theme] .success-message {
+  background: #E4F5E8;
+  color: #28643A;
+}
+
+[data-theme] .session-status.pending {
+  background: #FFF0D6;
+  color: #76521D;
+}
+
+[data-theme] .session-status.completed {
+  background: #E4F5E8;
+  color: #28643A;
+}
+
+[data-theme] .session-status.missed {
+  background: #FCE5E8;
+  color: #963D51;
+}
+
+
+/* =====================================================
+   16. AUTHENTICATION
+   FOLLOW OPERATING SYSTEM APPEARANCE
+===================================================== */
+
+.auth-page {
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: light) {
+  .auth-page {
+    background: #FFF7F9;
+    color: #49323D;
+  }
+
+  .auth-page input,
+  .auth-page select {
+    background: #FFFBFC;
+    color: #49323D;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-page {
+    background: #211B20;
+    color: #F7EDF2;
+  }
+
+  .auth-page input,
+  .auth-page select {
+    background: #40313B;
+    color: #F7EDF2;
+  }
+}
+
+
+/* =====================================================
+   17. TEXT SELECTION
+===================================================== */
+
+[data-theme] ::selection {
+  background: var(--app-accent);
+  color: var(--app-button-text);
+}
+
+
+/* =====================================================
+   18. ACCESSIBILITY
+===================================================== */
+
+[data-theme] button:focus-visible,
+[data-theme] a:focus-visible,
+[data-theme] input:focus-visible,
+[data-theme] select:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 3px;
+}
+
+[data-theme] .muted {
+  color: var(--app-muted);
+}
+
+/* SUBJECT CARD — SYSTEM DEFAULT DARK MODE */
+
+@media (prefers-color-scheme: dark) {
+
+  :root:not([data-theme]) .subject-card,
+  [data-theme="system"] .subject-card {
+    background: #382B35 !important;
+    color: #F7EDF2 !important;
+    border-color: #493944 !important;
+  }
+
+  :root:not([data-theme]) .subject-card h3,
+  :root:not([data-theme]) .subject-card p,
+  [data-theme="system"] .subject-card h3,
+  [data-theme="system"] .subject-card p {
+    color: #F7EDF2 !important;
+  }
+
+}
+
+/* =====================================================
+   AUTHENTICATION PAGES — THEME-AWARE DESIGN
+   Supports Light, Dark and System Default
+===================================================== */
+
+/* ---------------- LIGHT MODE ---------------- */
+
+:root[data-theme="light"] .auth-page {
+  background: #FFF7F9;
+  color: #49323D;
+}
+
+:root[data-theme="light"] .auth-card {
+  background: #FFFFFF;
+  color: #49323D;
+  border: 1px solid #EBD9E0;
+  box-shadow: 0 8px 30px rgba(110, 65, 83, 0.08);
+}
+
+:root[data-theme="light"] .auth-heading h1 {
+  color: #49323D !important;
+}
+
+:root[data-theme="light"] .auth-heading p {
+  color: #745563 !important;
+}
+
+:root[data-theme="light"] .auth-field label {
+  color: #49323D !important;
+}
+
+:root[data-theme="light"] .auth-field input {
+  background: #FFFBFC;
+  color: #49323D;
+  border: 1px solid #EBD9E0;
+}
+
+:root[data-theme="light"] .auth-field input::placeholder {
+  color: #927985;
+}
+
+:root[data-theme="light"] .remember-option,
+:root[data-theme="light"] .auth-footer {
+  color: #745563;
+}
+
+:root[data-theme="light"] .auth-link {
+  color: #C66F91;
+}
+
+:root[data-theme="light"] .auth-divider {
+  color: #745563;
+}
+
+
+/* ---------------- DARK MODE ---------------- */
+
+:root[data-theme="dark"] .auth-page {
+  background: #211B20;
+  color: #F7EDF2;
+}
+
+:root[data-theme="dark"] .auth-card {
+  background: #302630 !important;
+  color: #F7EDF2 !important;
+  border: 1px solid #493944;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+:root[data-theme="dark"] .auth-heading h1 {
+  color: #F7EDF2 !important;
+}
+
+:root[data-theme="dark"] .auth-heading p {
+  color: #D9C5CF !important;
+}
+
+:root[data-theme="dark"] .auth-field label {
+  color: #F7EDF2 !important;
+}
+
+:root[data-theme="dark"] .auth-field input {
+  background: #40313B !important;
+  color: #FFFFFF !important;
+  border: 1px solid #594451 !important;
+}
+
+:root[data-theme="dark"] .auth-field input::placeholder {
+  color: #B49EAA !important;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .password-toggle {
+  color: #E5A0BA;
+}
+
+:root[data-theme="dark"] .remember-option {
+  color: #D9C5CF !important;
+}
+
+:root[data-theme="dark"] .auth-link {
+  color: #F0A9C2 !important;
+}
+
+:root[data-theme="dark"] .auth-footer {
+  color: #D9C5CF !important;
+}
+
+:root[data-theme="dark"] .auth-divider {
+  color: #D9C5CF !important;
+}
+
+:root[data-theme="dark"] .auth-submit {
+  background: #E5A0BA;
+  color: #30212A;
+}
+
+:root[data-theme="dark"] .auth-submit:hover {
+  background: #F0B6CA;
+}
+
+
+/* ---------------- GOOGLE SIGN-IN ---------------- */
+
+:root[data-theme="dark"] .google-signin-container {
+  color: #F7EDF2;
+}
+
+
+/* ---------------- INPUT FOCUS ---------------- */
+
+.auth-field input:focus {
+  outline: none;
+  border-color: #D98FA5 !important;
+  box-shadow: 0 0 0 3px rgba(217, 143, 165, 0.18);
+}
+
+
+/* ---------------- CHECKBOX ---------------- */
+
+.auth-page input[type="checkbox"] {
+  accent-color: #D98FA5;
+  cursor: pointer;
+}
+
+
+/* ---------------- TRANSITIONS ---------------- */
+
+.auth-page,
+.auth-card,
+.auth-heading h1,
+.auth-heading p,
+.auth-field label,
+.auth-field input,
+.auth-footer,
+.auth-divider {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* AUTH DIVIDER VISIBILITY */
+
+.auth-divider {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  color: var(--app-text-secondary) !important;
+}
+
+.auth-divider span {
+  color: var(--app-text-secondary) !important;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 1 !important;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--app-border);
+}
+
+:root[data-theme="dark"] .auth-divider span {
+  color: #F7EDF2 !important;
+}
+
+:root[data-theme="light"] .auth-divider span {
+  color: #49323D !important;
+}
+
+/* GLOBAL APPLICATION FONT SCALING */
+
+.app-shell {
+  zoom: var(--app-font-scale, 1);
+}
+
+/* Authentication pages remain independent */
+
+.auth-page {
+  zoom: 1 !important;
+}
+
+/* FIX SIDEBAR HEIGHT DURING FONT SCALING */
+
+.app-shell .sidebar {
+  height: calc(100vh / var(--app-font-scale, 1));
+  min-height: calc(100vh / var(--app-font-scale, 1));
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+
+/* ==========================================
+   GLOBAL DYNAMIC ACCENT COLOR
+========================================== */
+
+/* Primary buttons */
+.app-shell button:not(.sidebar-link) {
+  --button-accent: var(--app-accent, var(--pink-medium));
+}
+
+/* Main application buttons */
+.app-shell .generate-plan-button,
+.app-shell .save-settings-btn,
+.app-shell .profile-edit-btn,
+.app-shell .profile-save-btn {
+  background: var(--button-accent) !important;
+  color: var(--app-button-text) !important;
+}
+
+/* Button hover */
+.app-shell .generate-plan-button:hover,
+.app-shell .save-settings-btn:hover,
+.app-shell .profile-edit-btn:hover,
+.app-shell .profile-save-btn:hover {
+  background: var(--app-accent-hover) !important;
+}
+
+/* Active sidebar */
+.app-shell .sidebar-link.active {
+  color: var(--app-accent) !important;
+  border-color: var(--app-accent);
+}
+
+/* Sidebar hover */
+.app-shell .sidebar-link:hover {
+  color: var(--app-accent) !important;
+}
+
+/* Links */
+.app-shell a,
+.app-shell .auth-link {
+  color: var(--app-accent);
+}
+
+/* Progress indicators */
+.app-shell .progress-track div {
+  background: var(--app-progress-fill);
+}
+
+/* Checkboxes */
+.app-shell input[type="checkbox"] {
+  accent-color: var(--app-accent);
+}
+
+/* Focus outlines */
+.app-shell input:focus,
+.app-shell select:focus,
+.app-shell textarea:focus {
+  border-color: var(--app-accent);
+}
+
+/* Selected Pomodoro mode */
+.app-shell .pomodoro-modes button.active {
+  background: var(--app-accent);
+}
+
+/* Selected study time */
+.app-shell .preferred-time-slot.selected {
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+}
+
+/* STUDY PREFERENCE SUMMARY */
+
+.study-preference-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px 30px;
+  padding: 15px 18px;
+  margin: 18px 0 25px;
+  background: var(--app-card-secondary);
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+}
+
+.study-preference-summary p {
+  margin: 0;
+  color: var(--app-text-secondary);
+  font-size: inherit;
+}

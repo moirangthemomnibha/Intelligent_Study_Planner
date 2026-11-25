@@ -1,16 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.database.session import get_session
+from app.modules.auth.models import User
+from app.modules.auth.dependencies import get_current_user
+from app.modules.students.models import Student
+
 from app.modules.students.schemas import (
     StudentCreate,
     StudentRead,
     StudentProfileUpdate,
     StudentProfileRead,
 )
+
 from app.modules.students.service import (
     create_student,
-    get_profile,
     update_profile,
     remove_profile_picture,
 )
@@ -29,41 +33,57 @@ def add_student(
         raise HTTPException(status_code=409, detail=str(exc))
 
 
-@router.get("/{student_id}/profile", response_model=StudentProfileRead)
-def read_student_profile(
-    student_id: int,
-    session: Session = Depends(get_session),
+def get_authenticated_student(
+    user: User,
+    session: Session,
 ):
-    student = get_profile(session, student_id)
+    student = session.exec(
+        select(Student).where(Student.user_id == user.id)
+    ).first()
 
     if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Student profile not found.",
+        )
 
     return student
 
 
-@router.put("/{student_id}/profile", response_model=StudentProfileRead)
+@router.get("/profile", response_model=StudentProfileRead)
+def read_student_profile(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    return get_authenticated_student(current_user, session)
+
+
+@router.put("/profile", response_model=StudentProfileRead)
 def edit_student_profile(
-    student_id: int,
     data: StudentProfileUpdate,
     session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    student = update_profile(session, student_id, data)
+    student = get_authenticated_student(current_user, session)
 
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+    updated = update_profile(session, student.id, data)
 
-    return student
+    if not updated:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    return updated
 
 
-@router.delete("/{student_id}/profile-picture")
+@router.delete("/profile-picture")
 def delete_student_profile_picture(
-    student_id: int,
     session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    student = remove_profile_picture(session, student_id)
+    student = get_authenticated_student(current_user, session)
 
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+    removed = remove_profile_picture(session, student.id)
 
-    return {"message": "Profile picture removed successfully"}
+    if not removed:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    return {"message": "Profile picture removed successfully."}

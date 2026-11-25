@@ -7,6 +7,10 @@ from sqlmodel import Session, select
 
 from app.database.session import get_session
 
+from app.modules.auth.models import User
+from app.modules.auth.dependencies import get_current_user
+
+from app.modules.students.models import Student
 from app.modules.topics.models import Topic
 from app.modules.subjects.models import Subject
 from app.modules.sessions.models import StudySession
@@ -19,28 +23,82 @@ router = APIRouter(
 
 
 # ==================================================
+# VERIFY SUBJECT OWNERSHIP
+# ==================================================
+
+def get_owned_subject(
+    subject_id: int,
+    current_user: User,
+    session: Session,
+):
+    subject = session.get(Subject, subject_id)
+
+    if subject is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Subject not found."
+        )
+
+    student = session.exec(
+        select(Student)
+        .where(Student.id == subject.student_id)
+        .where(Student.user_id == current_user.id)
+    ).first()
+
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Subject not found."
+        )
+
+    return subject
+
+
+# ==================================================
+# VERIFY TOPIC OWNERSHIP
+# ==================================================
+
+def get_owned_topic(
+    topic_id: int,
+    current_user: User,
+    session: Session,
+):
+    topic = session.get(Topic, topic_id)
+
+    if topic is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Topic not found."
+        )
+
+    get_owned_subject(
+        topic.subject_id,
+        current_user,
+        session
+    )
+
+    return topic
+
+
+# ==================================================
 # 1. CREATE TOPIC
 # ==================================================
 
 @router.post("/", response_model=Topic)
 def create_topic(
     topic: Topic,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     """
-    Create a topic under an existing subject.
+    Create a topic under a subject belonging to the authenticated user.
     """
 
-    subject = session.get(
-        Subject,
-        topic.subject_id
+    get_owned_subject(
+        topic.subject_id,
+        current_user,
+        session
     )
-
-    if subject is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Subject not found"
-        )
 
     topic.id = None
 
@@ -58,22 +116,18 @@ def create_topic(
 @router.get("/", response_model=list[Topic])
 def get_topics(
     subject_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     """
-    Retrieve all topics belonging to a subject.
+    Retrieve topics belonging to the authenticated user's subject.
     """
 
-    subject = session.get(
-        Subject,
-        subject_id
+    get_owned_subject(
+        subject_id,
+        current_user,
+        session
     )
-
-    if subject is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Subject not found"
-        )
 
     statement = select(Topic).where(
         Topic.subject_id == subject_id
@@ -89,24 +143,18 @@ def get_topics(
 @router.get("/{topic_id}", response_model=Topic)
 def get_topic(
     topic_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     """
-    Retrieve an individual topic.
+    Retrieve an individual topic belonging to the authenticated user.
     """
 
-    topic = session.get(
-        Topic,
-        topic_id
+    return get_owned_topic(
+        topic_id,
+        current_user,
+        session
     )
-
-    if topic is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Topic not found"
-        )
-
-    return topic
 
 
 # ==================================================
@@ -117,33 +165,25 @@ def get_topic(
 def update_topic(
     topic_id: int,
     updated_topic: Topic,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     """
-    Update an existing topic.
+    Update a topic belonging to the authenticated user.
     """
 
-    topic = session.get(
-        Topic,
-        topic_id
+    topic = get_owned_topic(
+        topic_id,
+        current_user,
+        session
     )
 
-    if topic is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Topic not found"
-        )
-
-    subject = session.get(
-        Subject,
-        updated_topic.subject_id
+    # Verify that the destination subject also belongs to this user.
+    get_owned_subject(
+        updated_topic.subject_id,
+        current_user,
+        session
     )
-
-    if subject is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Subject not found"
-        )
 
     topic.subject_id = updated_topic.subject_id
     topic.name = updated_topic.name
@@ -167,22 +207,18 @@ def update_topic(
 @router.delete("/{topic_id}")
 def delete_topic(
     topic_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     """
-    Delete a topic if it has no existing study sessions.
+    Delete an owned topic only if it has no existing study sessions.
     """
 
-    topic = session.get(
-        Topic,
-        topic_id
+    topic = get_owned_topic(
+        topic_id,
+        current_user,
+        session
     )
-
-    if topic is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Topic not found"
-        )
 
     existing_sessions = session.exec(
         select(StudySession).where(
@@ -203,5 +239,5 @@ def delete_topic(
     session.commit()
 
     return {
-        "message": "Topic deleted successfully"
+        "message": "Topic deleted successfully."
     }

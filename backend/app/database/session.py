@@ -4,7 +4,8 @@ from sqlmodel import SQLModel, Session, create_engine
 from sqlalchemy import text
 
 from app.core.config import settings
-
+from app.modules.planning.preferred_time_models import PreferredStudyTime
+from app.modules.settings.models import UserSettings
 
 sqlite = settings.database_url.startswith("sqlite")
 
@@ -81,6 +82,7 @@ def create_db_and_tables():
     from app.modules.sessions.models import StudySession
     from app.modules.planning.models import PlanSettings
     from app.modules.auth.models import User, EmailOTP
+    from app.modules.tasks.models import Task
 
     SQLModel.metadata.create_all(engine)
 

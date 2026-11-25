@@ -3,6 +3,12 @@ from typing import Optional
 
 
 class Student(SQLModel, table=True):
+    user_id: Optional[int] = Field(
+    default=None,
+    foreign_key="user.id",
+    unique=True,
+    index=True
+)
     # Basic student information
     id: Optional[int] = Field(default=None, primary_key=True)
     full_name: str

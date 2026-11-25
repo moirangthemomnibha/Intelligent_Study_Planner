@@ -1,4 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 
 # User Registration
@@ -22,6 +24,11 @@ class ResendOTPRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+# Google Authentication
+class GoogleAuthRequest(BaseModel):
+    credential: str
 
 
 # Authentication Response

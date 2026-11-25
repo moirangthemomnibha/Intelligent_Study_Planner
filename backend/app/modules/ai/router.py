@@ -8,6 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.database.session import get_session
+
+from app.modules.auth.models import User
+from app.modules.auth.dependencies import get_current_user
+
 from app.modules.students.models import Student
 from app.modules.subjects.models import Subject
 from app.modules.topics.models import Topic
@@ -29,10 +33,18 @@ router = APIRouter(prefix="/ai", tags=["AI"])
 )
 def get_recommendation(
     request: RecommendationRequest,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    # Check whether the student exists.
-    student = session.get(Student, request.student_id)
+    # ==========================================
+    # 1. VERIFY STUDENT OWNERSHIP
+    # ==========================================
+
+    student = session.exec(
+        select(Student)
+        .where(Student.id == request.student_id)
+        .where(Student.user_id == current_user.id)
+    ).first()
 
     if student is None:
         raise HTTPException(
@@ -40,11 +52,14 @@ def get_recommendation(
             detail="Student not found."
         )
 
-    # Retrieve the student's topics and associated subjects.
+    # ==========================================
+    # 2. RETRIEVE THE STUDENT'S TOPICS
+    # ==========================================
+
     statement = (
         select(Topic, Subject)
         .join(Subject, Topic.subject_id == Subject.id)
-        .where(Subject.student_id == request.student_id)
+        .where(Subject.student_id == student.id)
     )
 
     results = session.exec(statement).all()
@@ -56,6 +71,7 @@ def get_recommendation(
         try:
             exam_date = date.fromisoformat(subject.exam_date)
             days_to_exam = (exam_date - date.today()).days
+
         except (ValueError, TypeError):
             days_to_exam = 30
 
@@ -71,13 +87,19 @@ def get_recommendation(
             "days_to_exam": days_to_exam,
         })
 
-    # Prepare student information for the recommendation engine.
+    # ==========================================
+    # 3. PREPARE STUDENT INFORMATION
+    # ==========================================
+
     student_summary = {
         "student_id": student.id,
         "topics": student_topics,
     }
 
-    # Generate the recommendation.
+    # ==========================================
+    # 4. GENERATE RECOMMENDATION
+    # ==========================================
+
     result = recommend_next_action(student_summary)
 
     return RecommendationResponse(**result)

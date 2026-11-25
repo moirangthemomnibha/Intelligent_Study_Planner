@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.database.session import get_session
+from app.modules.auth.models import User
+from app.modules.auth.dependencies import get_current_user
 from app.modules.subjects.models import Subject
 from app.modules.students.models import Student
 
@@ -14,23 +16,72 @@ router = APIRouter(
 
 
 # ==========================================
+# VERIFY STUDENT OWNERSHIP
+# ==========================================
+
+def get_owned_student(
+    student_id: int,
+    current_user: User,
+    session: Session,
+):
+    student = session.exec(
+        select(Student)
+        .where(Student.id == student_id)
+        .where(Student.user_id == current_user.id)
+    ).first()
+
+    if not student:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found."
+        )
+
+    return student
+
+
+# ==========================================
+# VERIFY SUBJECT OWNERSHIP
+# ==========================================
+
+def get_owned_subject(
+    subject_id: int,
+    current_user: User,
+    session: Session,
+):
+    subject = session.get(Subject, subject_id)
+
+    if not subject:
+        raise HTTPException(
+            status_code=404,
+            detail="Subject not found."
+        )
+
+    get_owned_student(
+        subject.student_id,
+        current_user,
+        session
+    )
+
+    return subject
+
+
+# ==========================================
 # CREATE SUBJECT
 # ==========================================
 
 @router.post("/", response_model=Subject)
 def create_subject(
     subject: Subject,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    """Create a subject for an existing student."""
+    """Create a subject for the authenticated student."""
 
-    student = session.get(Student, subject.student_id)
-
-    if student is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
+    get_owned_student(
+        subject.student_id,
+        current_user,
+        session
+    )
 
     subject.id = None
 
@@ -48,17 +99,16 @@ def create_subject(
 @router.get("/", response_model=list[Subject])
 def get_subjects(
     student_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    """Retrieve subjects belonging to a student."""
+    """Retrieve subjects belonging to the authenticated student."""
 
-    student = session.get(Student, student_id)
-
-    if student is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
+    get_owned_student(
+        student_id,
+        current_user,
+        session
+    )
 
     statement = select(Subject).where(
         Subject.student_id == student_id
@@ -74,17 +124,14 @@ def get_subjects(
 @router.get("/{subject_id}", response_model=Subject)
 def get_subject(
     subject_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    subject = session.get(Subject, subject_id)
-
-    if subject is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Subject not found"
-        )
-
-    return subject
+    return get_owned_subject(
+        subject_id,
+        current_user,
+        session
+    )
 
 
 # ==========================================
@@ -94,19 +141,18 @@ def get_subject(
 @router.delete("/{subject_id}")
 def delete_subject(
     subject_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    subject = session.get(Subject, subject_id)
-
-    if subject is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Subject not found"
-        )
+    subject = get_owned_subject(
+        subject_id,
+        current_user,
+        session
+    )
 
     session.delete(subject)
     session.commit()
 
     return {
-        "message": "Subject deleted successfully"
+        "message": "Subject deleted successfully."
     }

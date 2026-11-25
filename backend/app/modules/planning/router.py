@@ -1,7 +1,7 @@
 """
 Planning API Router.
 
-Connects student data, subjects, topics,
+Connects authenticated student data, subjects, topics,
 priority calculation, scheduling and database persistence.
 """
 
@@ -12,6 +12,9 @@ from sqlmodel import Session, select
 
 from app.database.session import get_session
 
+from app.modules.auth.models import User
+from app.modules.auth.dependencies import get_current_user
+
 from app.modules.students.models import Student
 from app.modules.subjects.models import Subject
 from app.modules.topics.models import Topic
@@ -19,6 +22,15 @@ from app.modules.topics.models import Topic
 from app.modules.planning.schemas import (
     PlanRequest,
     PlannedSession
+)
+
+from app.modules.planning.preferred_time_models import (
+    PreferredStudyTime
+)
+
+from app.modules.planning.preferred_time_schemas import (
+    PreferredStudyTimeCreate,
+    PreferredStudyTimeRead,
 )
 
 from app.modules.planning.service import (
@@ -36,7 +48,31 @@ router = APIRouter(
 
 
 # ==================================================
-# GENERATE STUDY PLAN
+# 1. VERIFY STUDENT OWNERSHIP
+# ==================================================
+
+def get_owned_student(
+    student_id: int,
+    current_user: User,
+    session: Session,
+):
+    student = session.exec(
+        select(Student)
+        .where(Student.id == student_id)
+        .where(Student.user_id == current_user.id)
+    ).first()
+
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found."
+        )
+
+    return student
+
+
+# ==================================================
+# 2. GENERATE STUDY PLAN
 # ==================================================
 
 @router.post(
@@ -45,48 +81,32 @@ router = APIRouter(
 )
 def generate(
     request: PlanRequest,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    """
-    Generate and persist a personalized study plan.
-    """
 
-    # ------------------------------------------
-    # 1. VERIFY STUDENT
-    # ------------------------------------------
+    # VERIFY STUDENT OWNERSHIP
 
-    student = session.get(
-        Student,
-        request.student_id
+    get_owned_student(
+        request.student_id,
+        current_user,
+        session
     )
 
-    if student is None:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Student not found"
-        )
-
-    # ------------------------------------------
-    # 2. DETERMINE PLAN START DATE
-    # ------------------------------------------
+    # GET EXISTING PLANNING SETTINGS
 
     existing_settings = get_plan_settings(
         session,
         request.student_id
     )
 
-    if existing_settings:
+    start_date = (
+        existing_settings.plan_start
+        if existing_settings
+        else date.today()
+    )
 
-        start_date = existing_settings.plan_start
-
-    else:
-
-        start_date = date.today()
-
-    # ------------------------------------------
-    # 3. RETRIEVE STUDENT TOPICS
-    # ------------------------------------------
+    # RETRIEVE STUDENT TOPICS
 
     statement = (
         select(Topic, Subject)
@@ -103,39 +123,32 @@ def generate(
     results = session.exec(statement).all()
 
     if not results:
-
         raise HTTPException(
             status_code=400,
             detail="No topics found. Add subjects and topics first."
         )
 
-    topics = []
+    # PREPARE TOPIC INFORMATION
 
-    # ------------------------------------------
-    # 4. PREPARE TOPIC INFORMATION
-    # ------------------------------------------
+    topics = []
 
     for topic, subject in results:
 
         try:
-
-            exam_date = date.fromisoformat(
+            exam_date = (
                 subject.exam_date
+                if isinstance(subject.exam_date, date)
+                else date.fromisoformat(subject.exam_date)
             )
 
-        except ValueError:
+            if exam_date is None:
+                raise ValueError("Missing exam date")
 
+        except (ValueError, TypeError):
             raise HTTPException(
                 status_code=422,
-                detail=(
-                    f"Invalid exam date for subject "
-                    f"'{subject.name}'. Use YYYY-MM-DD."
-                )
+                detail=f"Invalid exam date for {subject.name}."
             )
-
-        days_to_exam = (
-            exam_date - start_date
-        ).days
 
         topics.append({
 
@@ -153,15 +166,24 @@ def generate(
 
             "priority": topic.priority,
 
-            "days_to_exam": days_to_exam,
+            "days_to_exam": (
+                exam_date - start_date
+            ).days,
 
             "exam_weight": subject.exam_weight
 
         })
 
-    # ------------------------------------------
-    # 5. GENERATE STUDY SCHEDULE
-    # ------------------------------------------
+    # RETRIEVE SAVED PREFERRED TIMES
+
+    preferred_times = session.exec(
+        select(PreferredStudyTime)
+        .where(
+            PreferredStudyTime.student_id == request.student_id
+        )
+    ).all()
+
+    # GENERATE STUDY SCHEDULE
 
     try:
 
@@ -169,7 +191,8 @@ def generate(
             topics=topics,
             available_minutes=request.available_minutes_per_day,
             days=request.horizon_days,
-            start_date=start_date
+            start_date=start_date,
+            preferred_times=preferred_times
         )
 
     except ValueError as error:
@@ -186,9 +209,7 @@ def generate(
             detail="No study sessions could be generated."
         )
 
-    # ------------------------------------------
-    # 6. SAVE PLANNING SETTINGS
-    # ------------------------------------------
+    # SAVE PLANNING SETTINGS
 
     save_plan_settings(
         session=session,
@@ -197,9 +218,7 @@ def generate(
         days=request.horizon_days
     )
 
-    # ------------------------------------------
-    # 7. PERSIST GENERATED SESSIONS
-    # ------------------------------------------
+    # SAVE GENERATED SESSIONS
 
     try:
 
@@ -213,13 +232,143 @@ def generate(
 
     except Exception:
 
+        session.rollback()
+
         raise HTTPException(
             status_code=500,
             detail="Failed to save generated study sessions."
         )
 
-    # ------------------------------------------
-    # 8. RETURN GENERATED PLAN
-    # ------------------------------------------
-
     return generated_plan
+
+
+# ==================================================
+# 3. PREFERRED STUDY TIME MANAGEMENT
+# ==================================================
+
+
+# GET PREFERRED STUDY TIMES
+
+@router.get(
+    "/preferred-times/",
+    response_model=list[PreferredStudyTimeRead]
+)
+def get_preferred_times(
+    student_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+
+    get_owned_student(
+        student_id,
+        current_user,
+        session
+    )
+
+    statement = (
+        select(PreferredStudyTime)
+        .where(
+            PreferredStudyTime.student_id == student_id
+        )
+        .order_by(
+            PreferredStudyTime.day_of_week,
+            PreferredStudyTime.start_time
+        )
+    )
+
+    return session.exec(statement).all()
+
+
+# ==================================================
+# 4. CREATE PREFERRED STUDY TIME
+# ==================================================
+
+@router.post(
+    "/preferred-times/",
+    response_model=PreferredStudyTimeRead
+)
+def create_preferred_time(
+    preferred_time: PreferredStudyTimeCreate,
+    student_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+
+    get_owned_student(
+        student_id,
+        current_user,
+        session
+    )
+
+    if preferred_time.start_time >= preferred_time.end_time:
+
+        raise HTTPException(
+            status_code=400,
+            detail="End time must be later than start time."
+        )
+
+    new_preferred_time = PreferredStudyTime(
+
+        student_id=student_id,
+
+        day_of_week=preferred_time.day_of_week,
+
+        start_time=preferred_time.start_time,
+
+        end_time=preferred_time.end_time,
+
+    )
+
+    session.add(new_preferred_time)
+
+    session.commit()
+
+    session.refresh(new_preferred_time)
+
+    return new_preferred_time
+
+
+# ==================================================
+# 5. DELETE PREFERRED STUDY TIME
+# ==================================================
+
+@router.delete(
+    "/preferred-times/{time_id}"
+)
+def delete_preferred_time(
+    time_id: int,
+    student_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+
+    get_owned_student(
+        student_id,
+        current_user,
+        session
+    )
+
+    preferred_time = session.exec(
+        select(PreferredStudyTime)
+        .where(
+            PreferredStudyTime.id == time_id
+        )
+        .where(
+            PreferredStudyTime.student_id == student_id
+        )
+    ).first()
+
+    if preferred_time is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Preferred study time not found."
+        )
+
+    session.delete(preferred_time)
+
+    session.commit()
+
+    return {
+        "message": "Preferred study time deleted successfully."
+    }

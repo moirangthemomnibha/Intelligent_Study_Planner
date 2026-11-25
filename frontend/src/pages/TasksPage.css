@@ -1,0 +1,741 @@
+/* ==========================================
+   TASKS PAGE
+   INTELLIGENT ADAPTIVE STUDY PLANNER
+========================================== */
+
+/* ==========================================
+   1. LIGHT MODE DEFAULT
+========================================== */
+
+.tasks-page {
+  --task-bg: #FFF5F7;
+  --task-card: #FFFFFF;
+  --task-card-secondary: #FFF0F4;
+
+  --task-text: #593B49;
+  --task-muted: #896B79;
+
+  --task-border: #F0DCE3;
+  --task-input: #FFFFFF;
+
+  --task-accent: #D98FA5;
+  --task-accent-hover: #C87994;
+
+  --task-danger: #C75B72;
+
+  width: 100%;
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 5px 0 30px;
+
+  color: var(--task-text);
+}
+
+/* ==========================================
+   2. DARK MODE
+========================================== */
+
+[data-theme="dark"] .tasks-page {
+  --task-bg: #211B20;
+  --task-card: #30252E;
+  --task-card-secondary: #382A33;
+
+  --task-text: #F5EAF0;
+  --task-muted: #CBB5C0;
+
+  --task-border: #594452;
+  --task-input: #40313B;
+
+  --task-accent: #D98FA5;
+  --task-accent-hover: #E9A9BD;
+
+  --task-danger: #C75B72;
+}
+
+/* ==========================================
+   3. PAGE HEADER
+========================================== */
+
+.tasks-page .tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 25px;
+}
+
+.tasks-page .tasks-header h1 {
+  margin: 0 0 8px;
+
+  font-size: 32px;
+  font-weight: 800;
+
+  color: var(--task-text);
+}
+
+.tasks-page .tasks-header p {
+  margin: 0;
+
+  font-size: 15px;
+  color: var(--task-muted);
+}
+
+/* ==========================================
+   4. LOADING
+========================================== */
+
+.tasks-page .tasks-loading {
+  padding: 50px;
+  text-align: center;
+
+  color: var(--task-text);
+  font-size: 16px;
+}
+
+/* ==========================================
+   5. ERROR MESSAGE
+========================================== */
+
+.tasks-page .tasks-error {
+  padding: 14px 18px;
+  margin-bottom: 22px;
+
+  border-radius: 10px;
+
+  background: #FCE5E8;
+  color: #A33D52;
+
+  border: 1px solid #F2C5CF;
+}
+
+/* ==========================================
+   6. TASK STATISTICS
+========================================== */
+
+.tasks-page .tasks-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 20px;
+
+  margin-bottom: 25px;
+}
+
+.tasks-page .task-stat-card {
+  background: var(--task-card);
+
+  border: 1px solid var(--task-border);
+  border-radius: 16px;
+
+  padding: 25px;
+
+  box-shadow: 0 4px 15px rgba(80, 40, 60, 0.05);
+
+  transition: transform 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.tasks-page .task-stat-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow: 0 7px 20px rgba(80, 40, 60, 0.09);
+}
+
+.tasks-page .task-stat-icon {
+  display: block;
+
+  font-size: 25px;
+  margin-bottom: 12px;
+}
+
+.tasks-page .task-stat-card p {
+  margin: 0 0 10px;
+
+  color: var(--task-muted);
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tasks-page .task-stat-card h2 {
+  margin: 0;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  color: var(--task-text);
+}
+
+/* ==========================================
+   7. MAIN SECTIONS
+========================================== */
+
+.tasks-page .tasks-section {
+  background: var(--task-card);
+
+  border: 1px solid var(--task-border);
+  border-radius: 16px;
+
+  padding: 28px;
+
+  margin-bottom: 25px;
+
+  box-shadow: 0 4px 15px rgba(80, 40, 60, 0.04);
+}
+
+/* ==========================================
+   8. SECTION HEADINGS
+========================================== */
+
+.tasks-page .tasks-section-heading {
+  margin-bottom: 25px;
+}
+
+.tasks-page .tasks-section-heading h2 {
+  margin: 0 0 8px;
+
+  font-size: 21px;
+  font-weight: 750;
+
+  color: var(--task-text);
+}
+
+.tasks-page .tasks-section-heading p {
+  margin: 0;
+
+  font-size: 14px;
+  color: var(--task-muted);
+}
+
+/* ==========================================
+   9. FORM GRID
+========================================== */
+
+.tasks-page .tasks-form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 22px 25px;
+}
+
+.tasks-page .tasks-form-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
+
+  min-width: 0;
+}
+
+.tasks-page .tasks-form-group label {
+  font-size: 14px;
+  font-weight: 650;
+
+  color: var(--task-text);
+}
+
+/* ==========================================
+   10. INPUTS AND SELECTS
+========================================== */
+
+.tasks-page .tasks-form-group input,
+.tasks-page .tasks-form-group select,
+.tasks-page .tasks-form-group textarea,
+.tasks-page .tasks-filters input,
+.tasks-page .tasks-filters select,
+.tasks-page .task-status-control select {
+
+  width: 100%;
+  min-width: 0;
+
+  min-height: 48px;
+
+  padding: 11px 13px;
+
+  border: 1px solid var(--task-border);
+  border-radius: 9px;
+
+  background: var(--task-input);
+  color: var(--task-text);
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition: border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.tasks-page input::placeholder,
+.tasks-page textarea::placeholder {
+  color: var(--task-muted);
+  opacity: 0.8;
+}
+
+.tasks-page .tasks-form-group input:focus,
+.tasks-page .tasks-form-group select:focus,
+.tasks-page .tasks-form-group textarea:focus,
+.tasks-page .tasks-filters input:focus,
+.tasks-page .tasks-filters select:focus {
+
+  border-color: var(--task-accent);
+
+  box-shadow: 0 0 0 3px rgba(217, 143, 165, 0.16);
+}
+
+/* Disabled topic dropdown */
+
+.tasks-page .tasks-form-group select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   11. DESCRIPTION
+========================================== */
+
+.tasks-page .tasks-description {
+  margin-top: 23px;
+}
+
+.tasks-page .tasks-description textarea {
+  width: 100%;
+  min-height: 110px;
+
+  padding: 13px;
+
+  resize: vertical;
+
+  border: 1px solid var(--task-border);
+  border-radius: 10px;
+
+  background: var(--task-input);
+  color: var(--task-text);
+
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* ==========================================
+   12. FORM BUTTONS
+========================================== */
+
+.tasks-page .tasks-form-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 22px;
+}
+
+.tasks-page .tasks-primary-btn,
+.tasks-page .tasks-secondary-btn,
+.tasks-page .tasks-edit-btn,
+.tasks-page .tasks-delete-btn {
+
+  min-height: 43px;
+
+  padding: 11px 20px;
+
+  border: none;
+  border-radius: 9px;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.tasks-page .tasks-primary-btn,
+.tasks-page .tasks-edit-btn {
+  background: var(--task-accent);
+  color: #FFFFFF;
+}
+
+.tasks-page .tasks-primary-btn:hover,
+.tasks-page .tasks-edit-btn:hover {
+  background: var(--task-accent-hover);
+  transform: translateY(-1px);
+}
+
+.tasks-page .tasks-secondary-btn {
+  background: var(--task-card-secondary);
+  color: var(--task-text);
+
+  border: 1px solid var(--task-border);
+}
+
+.tasks-page .tasks-secondary-btn:hover {
+  border-color: var(--task-accent);
+}
+
+.tasks-page button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   13. SEARCH AND FILTERS
+========================================== */
+
+.tasks-page .tasks-filters {
+  display: grid;
+
+  grid-template-columns: 2fr 1fr 1fr;
+
+  gap: 15px;
+
+  margin-bottom: 23px;
+}
+
+/* ==========================================
+   14. TASK LIST
+========================================== */
+
+.tasks-page .tasks-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+/* Individual task */
+
+.tasks-page .task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 25px;
+
+  padding: 23px;
+
+  background: var(--task-card-secondary);
+
+  border: 1px solid var(--task-border);
+  border-radius: 13px;
+
+  transition: border-color 0.2s ease,
+              transform 0.2s ease;
+}
+
+.tasks-page .task-item:hover {
+  border-color: var(--task-accent);
+  transform: translateY(-2px);
+}
+
+/* ==========================================
+   15. TASK CONTENT
+========================================== */
+
+.tasks-page .task-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.tasks-page .task-item-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+.tasks-page .task-item-heading h3 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 750;
+
+  color: var(--task-text);
+
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   16. PRIORITY BADGES
+========================================== */
+
+.tasks-page .task-priority {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 12px;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tasks-page .task-priority.low {
+  background: #E4F5E8;
+  color: #347A45;
+}
+
+.tasks-page .task-priority.medium {
+  background: #FFF0D6;
+  color: #946B28;
+}
+
+.tasks-page .task-priority.high {
+  background: #FCE5E8;
+  color: #B34D60;
+}
+
+/* ==========================================
+   17. TASK DESCRIPTION
+========================================== */
+
+.tasks-page .task-description-text {
+  margin: 10px 0 15px;
+
+  color: var(--task-muted);
+
+  font-size: 14px;
+  line-height: 1.7;
+
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   18. TASK METADATA
+========================================== */
+
+.tasks-page .task-metadata {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 18px;
+
+  margin: 14px 0;
+
+  font-size: 13px;
+  color: var(--task-muted);
+}
+
+/* ==========================================
+   19. TASK STATUS
+========================================== */
+
+.tasks-page .task-status-control {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 17px;
+}
+
+.tasks-page .task-status-control label {
+  font-size: 13px;
+  font-weight: 650;
+
+  color: var(--task-text);
+}
+
+.tasks-page .task-status-control select {
+  width: auto;
+  min-width: 155px;
+  min-height: 40px;
+
+  padding: 8px 12px;
+}
+
+/* ==========================================
+   20. TASK ACTION BUTTONS
+========================================== */
+
+.tasks-page .task-item-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  flex-shrink: 0;
+}
+
+.tasks-page .tasks-edit-btn {
+  background: var(--task-accent);
+  color: #FFFFFF;
+}
+
+.tasks-page .tasks-delete-btn {
+  background: var(--task-danger);
+  color: #FFFFFF;
+}
+
+.tasks-page .tasks-delete-btn:hover {
+  background: #AD455D;
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   21. EMPTY STATES
+========================================== */
+
+.tasks-page .tasks-empty {
+  padding: 45px 20px;
+
+  text-align: center;
+
+  background: var(--task-card-secondary);
+
+  border: 1px dashed var(--task-border);
+  border-radius: 13px;
+}
+
+.tasks-page .tasks-empty span {
+  display: block;
+  font-size: 35px;
+
+  margin-bottom: 12px;
+}
+
+.tasks-page .tasks-empty h3 {
+  margin: 0 0 8px;
+
+  color: var(--task-text);
+  font-size: 18px;
+}
+
+.tasks-page .tasks-empty p {
+  margin: 0;
+
+  color: var(--task-muted);
+  font-size: 14px;
+}
+
+/* ==========================================
+   22. DARK MODE CONTRAST
+========================================== */
+
+[data-theme="dark"] .tasks-page .task-item-heading h3,
+[data-theme="dark"] .tasks-page .task-stat-card h2,
+[data-theme="dark"] .tasks-page .tasks-section-heading h2,
+[data-theme="dark"] .tasks-page .tasks-header h1,
+[data-theme="dark"] .tasks-page .tasks-form-group label,
+[data-theme="dark"] .tasks-page .task-status-control label {
+  color: #F5EAF0;
+}
+
+[data-theme="dark"] .tasks-page input,
+[data-theme="dark"] .tasks-page select,
+[data-theme="dark"] .tasks-page textarea {
+  color-scheme: dark;
+}
+
+/* ==========================================
+   23. LIGHT MODE CONTRAST
+========================================== */
+
+[data-theme="light"] .tasks-page .task-item-heading h3,
+[data-theme="light"] .tasks-page .task-stat-card h2,
+[data-theme="light"] .tasks-page .tasks-section-heading h2,
+[data-theme="light"] .tasks-page .tasks-header h1,
+[data-theme="light"] .tasks-page .tasks-form-group label,
+[data-theme="light"] .tasks-page .task-status-control label {
+  color: #593B49;
+}
+
+[data-theme="light"] .tasks-page input,
+[data-theme="light"] .tasks-page select,
+[data-theme="light"] .tasks-page textarea {
+  color-scheme: light;
+}
+
+/* ==========================================
+   24. RESPONSIVE DESIGN
+========================================== */
+
+@media (max-width: 1000px) {
+
+  .tasks-page .tasks-summary {
+    gap: 14px;
+  }
+
+  .tasks-page .tasks-section {
+    padding: 23px;
+  }
+
+  .tasks-page .tasks-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tasks-page .tasks-filters input {
+    grid-column: 1 / -1;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .tasks-page .tasks-header h1 {
+    font-size: 27px;
+  }
+
+  .tasks-page .tasks-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-page .tasks-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-page .task-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tasks-page .task-item-actions {
+    width: 100%;
+  }
+
+  .tasks-page .task-item-actions button {
+    flex: 1;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .tasks-page {
+    padding: 0 2px 20px;
+  }
+
+  .tasks-page .tasks-section {
+    padding: 18px;
+  }
+
+  .tasks-page .tasks-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-page .tasks-filters input {
+    grid-column: auto;
+  }
+
+  .tasks-page .task-metadata {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+  }
+
+  .tasks-page .task-status-control {
+    flex-wrap: wrap;
+  }
+
+  .tasks-page .tasks-form-actions {
+    flex-wrap: wrap;
+  }
+
+}

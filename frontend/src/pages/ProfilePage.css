@@ -341,3 +341,50 @@ gap: 12px;
 .camera-actions button {
   width: 100%;
 }
+
+/* FULL-SCREEN PROFILE IMAGE PREVIEW */
+
+.profile-image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(25, 15, 20, 0.92);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 25px;
+  cursor: zoom-out;
+}
+
+.profile-image-modal img {
+  display: block;
+  max-width: 92vw;
+  max-height: 88vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  cursor: default;
+}
+
+.profile-image-close {
+  position: absolute;
+  top: 25px;
+  right: 30px;
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  color: #593b49;
+  font-size: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-image-close:hover {
+  background: #f5dce5;
+}

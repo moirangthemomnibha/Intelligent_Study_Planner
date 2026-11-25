@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 
-const STUDENT_ID = 3;
-
 export function SubjectsPage() {
+  const [student, setStudent] = useState(null);
   const [subjects, setSubjects] = useState([]);
+
+  const today = new Date();
+  const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -17,42 +20,74 @@ export function SubjectsPage() {
 
   const [adding, setAdding] = useState(false);
 
-  // LOAD SUBJECTS
-  async function loadSubjects() {
+  // ==========================================
+  // LOAD AUTHENTICATED STUDENT AND SUBJECTS
+  // ==========================================
+
+  async function loadSubjects(studentId) {
+    try {
+      const data = await api.getSubjects(studentId);
+      setSubjects(data);
+    } catch (err) {
+      setError(err.message || "Unable to load subjects.");
+      throw err;
+    }
+  }
+
+  async function initializePage() {
     try {
       setLoading(true);
       setError("");
 
-      const data = await api.getSubjects(STUDENT_ID);
-      setSubjects(data);
+      const profile = await api.getStudentProfile();
+
+      if (!profile || !profile.id) {
+        throw new Error(
+          "Student profile not found. Please complete your profile."
+        );
+      }
+
+      setStudent(profile);
+
+      await loadSubjects(profile.id);
 
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Unable to initialize subjects.");
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadSubjects();
+    initializePage();
   }, []);
 
+  // ==========================================
   // HANDLE FORM INPUT
+  // ==========================================
+
   function handleChange(e) {
     const { name, value } = e.target;
 
     setForm(previous => ({
       ...previous,
-      [name]:
-        name === "exam_weight"
-          ? Number(value)
-          : value,
+      [name]: name === "exam_weight"
+        ? Number(value)
+        : value,
     }));
   }
 
+  // ==========================================
   // ADD SUBJECT
+  // ==========================================
+
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (!student?.id) {
+      setError("Student profile not found.");
+      return;
+    }
 
     try {
       setAdding(true);
@@ -60,7 +95,7 @@ export function SubjectsPage() {
       setSuccess("");
 
       await api.createSubject({
-        student_id: STUDENT_ID,
+        student_id: student.id,
         name: form.name.trim(),
         exam_date: form.exam_date,
         exam_weight: form.exam_weight,
@@ -72,21 +107,24 @@ export function SubjectsPage() {
         exam_weight: 1,
       });
 
+      await loadSubjects(student.id);
+
       setSuccess("Subject added successfully!");
 
-      await loadSubjects();
-
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Unable to add subject.");
     } finally {
       setAdding(false);
     }
   }
 
+  // ==========================================
   // DELETE SUBJECT
+  // ==========================================
+
   async function handleDelete(subjectId) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this subject?"
+      "Are you sure you want to delete this subject and its associated data?"
     );
 
     if (!confirmed) return;
@@ -97,44 +135,90 @@ export function SubjectsPage() {
 
       await api.deleteSubject(subjectId);
 
+      await loadSubjects(student.id);
+
       setSuccess("Subject deleted successfully!");
 
-      await loadSubjects();
-
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Unable to delete subject.");
     }
   }
+
+  // ==========================================
+  // LOADING STATE
+  // ==========================================
+
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <section className="panel">
+          <h2>Loading your subjects...</h2>
+          <p>Please wait while we retrieve your information.</p>
+        </section>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // DASHBOARD
+  // ==========================================
 
   return (
     <div className="dashboard">
 
+      {/* WELCOME BANNER */}
+
       <div className="welcome-banner">
+
         <div>
           <h2>My Subjects ♡</h2>
-          <p>Organize your subjects and examination schedules.</p>
+
+          <p>
+            Organize your subjects and examination schedules.
+          </p>
         </div>
 
         <div className="date-card">
           <h3>{subjects.length}</h3>
           <p>Total Subjects</p>
         </div>
+
       </div>
+
+      {/* ERROR MESSAGE */}
+
+      {error && (
+        <div style={messageStyle}>
+          {error}
+        </div>
+      )}
+
+      {/* SUCCESS MESSAGE */}
+
+      {success && (
+        <div
+          style={{
+            ...messageStyle,
+            background: "#E6F7EC",
+            color: "#287A46",
+          }}
+        >
+          {success}
+        </div>
+      )}
 
       {/* ADD SUBJECT FORM */}
 
-      <section className="panel" style={{ marginBottom: 24 }}>
+      <section
+        className="panel"
+        style={{ marginBottom: 24 }}
+      >
 
         <h3>＋ Add New Subject</h3>
 
         <form onSubmit={handleSubmit}>
 
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: 18,
-            marginTop: 20
-          }}>
+          <div style={formGridStyle}>
 
             <div>
               <label>Subject Name *</label>
@@ -153,12 +237,13 @@ export function SubjectsPage() {
             </div>
 
             <div>
-              <label>Examination Date *</label>
+              <label>Exam / Target Date *</label>
 
               <input
                 type="date"
                 name="exam_date"
                 value={form.exam_date}
+                min={minDate}
                 onChange={handleChange}
                 required
                 style={inputStyle}
@@ -166,7 +251,7 @@ export function SubjectsPage() {
             </div>
 
             <div>
-              <label>Exam Weight *</label>
+              <label>Subject Weightage *</label>
 
               <input
                 type="number"
@@ -184,33 +269,19 @@ export function SubjectsPage() {
 
           <button
             type="submit"
-            disabled={adding}
-            style={buttonStyle}
+            disabled={adding || !student}
+            style={{
+              ...buttonStyle,
+              opacity: adding ? 0.7 : 1,
+              cursor: adding ? "not-allowed" : "pointer",
+            }}
           >
-            {adding ? "Adding..." : "+ Add Subject"}
+            {adding ? "Adding Subject..." : "+ Add Subject"}
           </button>
 
         </form>
 
       </section>
-
-      {/* MESSAGES */}
-
-      {error && (
-        <div style={messageStyle}>
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div style={{
-          ...messageStyle,
-          background: "#E6F7EC",
-          color: "#287A46"
-        }}>
-          {success}
-        </div>
-      )}
 
       {/* SUBJECT LIST */}
 
@@ -218,36 +289,27 @@ export function SubjectsPage() {
 
         <h3>▤ Your Subjects</h3>
 
-        {loading ? (
+        {subjects.length === 0 ? (
 
-          <p>Loading subjects...</p>
-
-        ) : subjects.length === 0 ? (
-
-          <div style={{ textAlign: "center", padding: 35 }}>
+          <div style={emptyStyle}>
             <h3>No subjects added yet ♡</h3>
-            <p>Use the form above to add your first subject.</p>
+
+            <p>
+              Start organizing your academic journey
+              by adding your first subject.
+            </p>
           </div>
 
         ) : (
 
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-            gap: 18,
-            marginTop: 20
-          }}>
+          <div style={subjectGridStyle}>
 
             {subjects.map(subject => (
 
               <div
                 key={subject.id}
-                style={{
-                  background: "#FFF5F7",
-                  border: "1px solid #F8DCE5",
-                  borderRadius: 14,
-                  padding: 20
-                }}
+                className="subjecy-card"
+                style={subjectCardStyle}
               >
 
                 <h3>{subject.name}</h3>
@@ -265,12 +327,9 @@ export function SubjectsPage() {
                 </p>
 
                 <button
+                  type="button"
                   onClick={() => handleDelete(subject.id)}
-                  style={{
-                    ...buttonStyle,
-                    background: "#C87994",
-                    marginTop: 10
-                  }}
+                  style={deleteButtonStyle}
                 >
                   Delete Subject
                 </button>
@@ -289,7 +348,16 @@ export function SubjectsPage() {
   );
 }
 
-// INPUT STYLING
+// ==========================================
+// STYLES
+// ==========================================
+
+const formGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+  gap: 18,
+  marginTop: 20,
+};
 
 const inputStyle = {
   display: "block",
@@ -297,14 +365,12 @@ const inputStyle = {
   padding: 12,
   marginTop: 8,
   borderRadius: 9,
-  border: "1px solid #E8C5D1",
-  background: "#FFFFFF",
-  color: "#593B49",
+  border: "1px solid var(--app-border)",
+  background: "var(--app-input)",
+  color: "var(--app-text)",
   boxSizing: "border-box",
-  fontSize: 14
+  fontSize: 14,
 };
-
-// BUTTON STYLING
 
 const buttonStyle = {
   background: "#D98FA5",
@@ -313,16 +379,40 @@ const buttonStyle = {
   borderRadius: 9,
   padding: "12px 20px",
   marginTop: 20,
-  cursor: "pointer",
-  fontWeight: 600
+  fontWeight: 600,
 };
 
-// MESSAGE STYLING
+const deleteButtonStyle = {
+  ...buttonStyle,
+  background: "#C87994",
+  marginTop: 10,
+  cursor: "pointer",
+};
 
 const messageStyle = {
   background: "#FCE4EC",
   color: "#A33D60",
   padding: 14,
   borderRadius: 9,
-  marginBottom: 18
+  marginBottom: 18,
+};
+
+const emptyStyle = {
+  textAlign: "center",
+  padding: 35,
+};
+
+const subjectGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+  gap: 18,
+  marginTop: 20,
+};
+
+const subjectCardStyle = {
+  background: "var(--app-card-secondary)",
+  color: "var(--app-text)",
+  border: "1px solid var(--app-border)",
+  borderRadius: 14,
+  padding: 20,
 };

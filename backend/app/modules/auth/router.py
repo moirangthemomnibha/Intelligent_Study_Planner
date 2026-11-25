@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
 from app.database.session import get_session
+
 from app.modules.auth.schemas import (
     RegisterRequest,
     OTPVerifyRequest,
@@ -12,8 +13,10 @@ from app.modules.auth.schemas import (
     TokenResponse,
     ForgotPasswordRequest,
     ResetPasswordRequest,
+    GoogleAuthRequest,
     UserRead,
 )
+
 from app.modules.auth.service import (
     register_user,
     verify_email_otp,
@@ -21,6 +24,7 @@ from app.modules.auth.service import (
     login_user,
     forgot_password,
     reset_password,
+    google_login,
 )
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -87,3 +91,14 @@ def reset_password_endpoint(
         return reset_password(session, data)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/google", response_model=TokenResponse)
+def google_auth(
+    data: GoogleAuthRequest,
+    session: Session = Depends(get_session),
+):
+    try:
+        return google_login(session, data.credential)
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail=str(exc))

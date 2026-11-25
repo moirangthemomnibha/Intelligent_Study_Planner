@@ -42,7 +42,7 @@ def update_profile(
     if not student:
         return None
 
-    profile_data = data.model_dump()
+    profile_data = data.model_dump(exclude_unset=True)
 
     for field, value in profile_data.items():
         setattr(student, field, value)

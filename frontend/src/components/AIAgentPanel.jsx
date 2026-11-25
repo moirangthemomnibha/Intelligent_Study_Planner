@@ -1,9 +1,5 @@
 import { useState } from "react";
-
-const API_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
-
-const STUDENT_ID = 3;
+import { api } from "../api/client";
 
 export function AIAgentPanel() {
   const [intent, setIntent] = useState("");
@@ -25,19 +21,31 @@ export function AIAgentPanel() {
     setProposal(null);
 
     try {
-      const response = await fetch(`${API_URL}/agent/run`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          student_id: STUDENT_ID,
-          intent,
-          approval_mode: "ask_before_changes",
-          available_minutes_per_day: 180,
-          horizon_days: 7,
-        }),
-      });
+      const profile = await api.getStudentProfile();
+
+      if (!profile?.id) {
+        throw new Error("Student profile not found. Please log in again.");
+      }
+
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1"}/agent/run`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            student_id: profile.id,
+            intent,
+            approval_mode: "ask_before_changes",
+            available_minutes_per_day: 180,
+            horizon_days: 7,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -46,8 +54,10 @@ export function AIAgentPanel() {
       }
 
       setProposal(data);
+
     } catch (err) {
-      setError(err.message);
+      console.error("AI agent error:", err);
+      setError(err.message || "Unable to contact the study agent.");
     } finally {
       setLoading(false);
     }
@@ -68,20 +78,32 @@ export function AIAgentPanel() {
     setMessage("");
 
     try {
-      const response = await fetch(`${API_URL}/agent/confirm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          student_id: STUDENT_ID,
-          start_date: studyPlan.start_date,
-          horizon_days: studyPlan.horizon_days,
-          available_minutes_per_day:
-            studyPlan.available_minutes_per_day,
-          generated_plan: studyPlan.sessions,
-        }),
-      });
+      const profile = await api.getStudentProfile();
+
+      if (!profile?.id) {
+        throw new Error("Student profile not found. Please log in again.");
+      }
+
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1"}/agent/confirm`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            student_id: profile.id,
+            start_date: studyPlan.start_date,
+            horizon_days: studyPlan.horizon_days,
+            available_minutes_per_day:
+              studyPlan.available_minutes_per_day,
+            generated_plan: studyPlan.sessions,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -95,8 +117,10 @@ export function AIAgentPanel() {
 
       setProposal(null);
       setIntent("");
+
     } catch (err) {
-      setError(err.message);
+      console.error("AI agent save error:", err);
+      setError(err.message || "Unable to save study plan.");
     } finally {
       setSaving(false);
     }
@@ -172,7 +196,7 @@ export function AIAgentPanel() {
               <p>{recommendation.message}</p>
 
               <ul>
-                {recommendation.reasons.map((reason, index) => (
+                {recommendation.reasons?.map((reason, index) => (
                   <li key={index}>{reason}</li>
                 ))}
               </ul>

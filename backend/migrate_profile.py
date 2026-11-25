@@ -47,6 +47,28 @@ for column, data_type in NEW_COLUMNS.items():
         )
         print(f"Added: {column}")
 
+# Add user_id to student table
+cursor.execute("PRAGMA table_info(student)")
+existing_columns = {
+    row[1] for row in cursor.fetchall()
+}
+
+if "user_id" not in existing_columns:
+    cursor.execute("""
+        ALTER TABLE student
+        ADD COLUMN user_id INTEGER REFERENCES user(id)
+    """)
+    print("Added user_id column.")
+
+# Ensure one profile per account
+cursor.execute("""
+    CREATE UNIQUE INDEX IF NOT EXISTS
+    ix_student_user_id_unique
+    ON student(user_id)
+""")
+
+print("User account relationship migration completed.")
+
 connection.commit()
 connection.close()
 

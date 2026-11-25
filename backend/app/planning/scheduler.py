@@ -1,79 +1,91 @@
 """
 Intelligent Adaptive Multi-Day Study Scheduler.
-
-Features:
-1. Multi-day study distribution.
-2. Daily study-time protection.
-3. Maximum 90-minute sessions.
-4. Completion-aware scheduling.
-5. Priority-based topic allocation.
-6. Flexible planning horizon.
-7. Learning-speed adjustment.
-8. Revision support.
-9. Daily workload balancing.
-10. Scheduling explanations.
+Supports preferred study days and time slots.
 """
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from math import ceil
 
-
 MAX_SESSION_MINUTES = 90
+
+
+def convert_time_to_minutes(value) -> int:
+    """Convert a time object or HH:MM string into minutes."""
+
+    if hasattr(value, "hour") and hasattr(value, "minute"):
+        return value.hour * 60 + value.minute
+
+    parsed_time = datetime.strptime(str(value), "%H:%M")
+    return parsed_time.hour * 60 + parsed_time.minute
 
 
 def build_schedule(
     topics: list[dict],
     available_minutes: int,
     days: int,
-    start_date: date | None = None
+    start_date: date | None = None,
+    preferred_times: list | None = None
 ) -> list[dict]:
 
-    # ==========================================
-    # 1. VALIDATE INPUTS
-    # ==========================================
-
     if available_minutes <= 0:
-        raise ValueError(
-            "available_minutes must be greater than zero"
-        )
+        raise ValueError("Available minutes must be greater than zero.")
 
     if days <= 0:
-        raise ValueError(
-            "days must be greater than zero"
-        )
+        raise ValueError("Planning days must be greater than zero.")
 
     if start_date is None:
         start_date = date.today()
 
     plan = []
 
-    daily_usage = [0] * days
+    # ------------------------------------------
+    # PREPARE PREFERRED STUDY DAYS
+    # ------------------------------------------
 
-    # ==========================================
-    # 2. PREPARE TOPICS
-    # ==========================================
+    preferred_daily_minutes = {}
+
+    if preferred_times:
+        for item in preferred_times:
+
+            day = int(item.day_of_week)
+
+            start_minutes = convert_time_to_minutes(
+                item.start_time
+            )
+
+            end_minutes = convert_time_to_minutes(
+                item.end_time
+            )
+
+            duration = end_minutes - start_minutes
+
+            if duration <= 0:
+                continue
+
+            preferred_daily_minutes[day] = (
+                preferred_daily_minutes.get(day, 0)
+                + duration
+            )
+
+    # ------------------------------------------
+    # PREPARE TOPICS
+    # ------------------------------------------
 
     prepared_topics = []
 
     for topic in topics:
 
         completion = max(
-            0.0,
-            min(
-                100.0,
-                float(topic.get("completion_percent", 0))
-            )
+            0,
+            min(100, float(topic.get("completion_percent", 0)))
         )
 
         if completion >= 100:
             continue
 
-        estimated_minutes = max(
-            0,
-            int(topic.get("estimated_minutes", 0))
-        )
+        estimated = int(topic.get("estimated_minutes", 0))
 
-        if estimated_minutes <= 0:
+        if estimated <= 0:
             continue
 
         learning_speed = max(
@@ -81,31 +93,36 @@ def build_schedule(
             float(topic.get("learning_speed", 1.0))
         )
 
-        remaining_minutes = ceil(
-            estimated_minutes
+        remaining = ceil(
+            estimated
             * (100 - completion) / 100
             * learning_speed
         )
 
         prepared_topics.append({
             **topic,
-            "remaining_minutes": remaining_minutes
+            "remaining_minutes": remaining
         })
-
-    # ==========================================
-    # 3. SORT TOPICS BY PRIORITY
-    # ==========================================
 
     prepared_topics.sort(
         key=lambda topic: float(
-            topic.get("priority_score", 0)
+            topic.get(
+                "priority_score",
+                topic.get("priority", 0)
+            )
         ),
         reverse=True
     )
 
-    # ==========================================
-    # 4. GENERATE DAILY SCHEDULE
-    # ==========================================
+    # ------------------------------------------
+    # TRACK DAILY WORKLOAD
+    # ------------------------------------------
+
+    daily_usage = [0] * days
+
+    # ------------------------------------------
+    # GENERATE STUDY SCHEDULE
+    # ------------------------------------------
 
     for topic in prepared_topics:
 
@@ -116,79 +133,59 @@ def build_schedule(
             if minutes_left <= 0:
                 break
 
-            remaining_daily_time = (
-                available_minutes - daily_usage[day_index]
+            current_date = start_date + timedelta(
+                days=day_index
             )
 
-            if remaining_daily_time <= 0:
+            weekday = current_date.weekday()
+
+            if preferred_times:
+                daily_limit = min(
+                    available_minutes,
+                    preferred_daily_minutes.get(weekday, 0)
+                )
+            else:
+                daily_limit = available_minutes
+
+            remaining_daily = (
+                daily_limit - daily_usage[day_index]
+            )
+
+            if remaining_daily <= 0:
                 continue
 
             chunk = min(
                 minutes_left,
-                remaining_daily_time,
+                remaining_daily,
                 MAX_SESSION_MINUTES
             )
 
-            if chunk <= 0:
-                continue
-
-            session_date = (
-                start_date + timedelta(days=day_index)
-            )
-
-            # ==================================
-            # 5. GENERATE EXPLANATION
-            # ==================================
-
-            reason = topic.get(
-                "reason",
-                "Scheduled according to calculated priority."
-            )
-
-            if topic.get("revision_due"):
-                reason += " Revision is due."
-
-            if topic.get("missed_sessions", 0) > 0:
-                reason += " Includes recovery from missed sessions."
-
-            if topic.get("learning_speed", 1.0) > 1.2:
-                reason += " Additional time allocated based on learning speed."
-
-            # ==================================
-            # 6. ADD STUDY SESSION
-            # ==================================
-
             plan.append({
-
                 "topic_id": topic.get("id"),
-
                 "topic_name": topic.get(
                     "name",
                     "Untitled topic"
                 ),
-
-                "day": session_date.isoformat(),
-
+                "day": current_date.isoformat(),
                 "duration_minutes": chunk,
-
                 "priority_score": float(
                     topic.get("priority_score", 0)
                 ),
-
-                "reason": reason
-
+                "reason": topic.get(
+                    "reason",
+                    "Scheduled according to calculated priority."
+                )
             })
 
             minutes_left -= chunk
-
             daily_usage[day_index] += chunk
 
     return plan
 
 
-# ==============================================
-# 7. CALCULATE DAILY WORKLOAD
-# ==============================================
+# ==================================================
+# CALCULATE DAILY WORKLOAD
+# ==================================================
 
 def calculate_daily_workload(
     schedule: list[dict]
@@ -208,9 +205,9 @@ def calculate_daily_workload(
     return workload
 
 
-# ==============================================
-# 8. DETECT UNUSED STUDY TIME
-# ==============================================
+# ==================================================
+# CALCULATE REMAINING DAILY TIME
+# ==================================================
 
 def calculate_remaining_daily_time(
     schedule: list[dict],
@@ -227,17 +224,13 @@ def calculate_remaining_daily_time(
 
     workload = calculate_daily_workload(schedule)
 
-    remaining_time = {}
-
-    for index in range(days):
-
-        current_date = (
-            start_date + timedelta(days=index)
-        ).isoformat()
-
-        remaining_time[current_date] = max(
+    return {
+        (start_date + timedelta(days=i)).isoformat(): max(
             0,
-            available_minutes - workload.get(current_date, 0)
+            available_minutes - workload.get(
+                (start_date + timedelta(days=i)).isoformat(),
+                0
+            )
         )
-
-    return remaining_time
+        for i in range(days)
+    }

@@ -3,7 +3,11 @@ __pycache__/
 *.py[cod]
 venv/
 .venv/
+
+# Environment variables and secrets
 .env
+.env.*
+!.env.example
 
 # Database
 *.db
@@ -16,3 +20,17 @@ dist/
 # IDE
 .vscode/
 .DS_Store
+# Additional database protection
+*.sqlite
+
+# User personal information
+**/user_data/
+**/personal_data/
+**/private_data/
+**/user_uploads/
+**/uploads/
+**/backups/
+
+# Logs and build files
+*.log
+build/

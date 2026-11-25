@@ -2,15 +2,14 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "http://localhost:8000/api/v1";
 
-// ==========================================
-// COMMON API REQUEST FUNCTION
-// ==========================================
-
 async function request(path, options = {}) {
+  const token = localStorage.getItem("access_token");
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
@@ -26,39 +25,81 @@ async function request(path, options = {}) {
   return response.json();
 }
 
-// ==========================================
-// API METHODS
-// ==========================================
-
 export const api = {
-
-  // HEALTH
   health: () =>
     request("/health/"),
 
-  // STUDENTS
+  register: (data) =>
+    request("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  verifyEmail: (data) =>
+    request("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  resendOTP: (data) =>
+    request("/auth/resend-otp", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  login: (data) =>
+    request("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  googleLogin: (credential) =>
+    request("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+    }),
+
+  forgotPassword: (data) =>
+    request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  resetPassword: (data) =>
+    request("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  saveToken: (token) =>
+    localStorage.setItem("access_token", token),
+
+  getToken: () =>
+    localStorage.getItem("access_token"),
+
+  clearToken: () =>
+    localStorage.removeItem("access_token"),
+
   createStudent: (data) =>
     request("/students/", {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
-      // STUDENT PROFILE
-  getStudentProfile: (studentId) =>
-    request(`/students/${studentId}/profile`),
+  getStudentProfile: () =>
+    request("/students/profile"),
 
-  updateStudentProfile: (studentId, data) =>
-    request(`/students/${studentId}/profile`, {
+  updateStudentProfile: (data) =>
+    request("/students/profile", {
       method: "PUT",
       body: JSON.stringify(data),
     }),
 
-  removeProfilePicture: (studentId) =>
-    request(`/students/${studentId}/profile-picture`, {
+  removeProfilePicture: () =>
+    request("/students/profile-picture", {
       method: "DELETE",
     }),
 
-  // SUBJECTS
   createSubject: (data) =>
     request("/subjects/", {
       method: "POST",
@@ -66,7 +107,9 @@ export const api = {
     }),
 
   getSubjects: (studentId) =>
-    request(`/subjects/?student_id=${studentId}`),
+    studentId
+      ? request(`/subjects/?student_id=${studentId}`)
+      : request("/subjects/"),
 
   getSubject: (subjectId) =>
     request(`/subjects/${subjectId}`),
@@ -76,7 +119,6 @@ export const api = {
       method: "DELETE",
     }),
 
-  // TOPICS
   createTopic: (data) =>
     request("/topics/", {
       method: "POST",
@@ -100,12 +142,16 @@ export const api = {
       method: "DELETE",
     }),
 
-  // STUDY SESSIONS
   getSessions: (studentId) =>
-    request(`/sessions/?student_id=${studentId}`),
+    studentId
+      ? request(`/sessions/?student_id=${studentId}`)
+      : request("/sessions/"),
 
   getSession: (sessionId) =>
     request(`/sessions/${sessionId}`),
+
+  getWeeklyReport: (studentId) =>
+    request(`/sessions/weekly-report?student_id=${studentId}`),
 
   updateSessionStatus: (sessionId, status) =>
     request(
@@ -125,21 +171,60 @@ export const api = {
       { method: "PATCH" }
     ),
 
-  // STUDY PLANNING
   generatePlan: (data) =>
     request("/planning/generate", {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
-  // AI RECOMMENDATIONS
   getRecommendation: (studentId, question = null) =>
     request("/ai/recommend", {
       method: "POST",
       body: JSON.stringify({
-        student_id: studentId,
+        ...(studentId ? { student_id: studentId } : {}),
         question,
       }),
     }),
 
+    // ==========================================
+// TASKS
+// ==========================================
+
+getTasks: (studentId) =>
+  request(`/tasks/?student_id=${studentId}`),
+
+getTask: (taskId, studentId) =>
+  request(`/tasks/${taskId}?student_id=${studentId}`),
+
+createTask: (taskData) =>
+  request("/tasks/", {
+    method: "POST",
+    body: JSON.stringify(taskData),
+  }),
+
+updateTask: (taskId, studentId, taskData) =>
+  request(`/tasks/${taskId}?student_id=${studentId}`, {
+    method: "PUT",
+    body: JSON.stringify(taskData),
+  }),
+
+deleteTask: (taskId, studentId) =>
+  request(`/tasks/${taskId}?student_id=${studentId}`, {
+    method: "DELETE",
+  }),
+
+getPreferredTimes: (studentId) =>
+  request(`/planning/preferred-times/?student_id=${studentId}`),
+
+createPreferredTime: (studentId, data) =>
+  request(`/planning/preferred-times/?student_id=${studentId}`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  }),
+
+deletePreferredTime: (studentId, timeId) =>
+  request(
+    `/planning/preferred-times/${timeId}?student_id=${studentId}`,
+    { method: "DELETE" }
+  ),
 };

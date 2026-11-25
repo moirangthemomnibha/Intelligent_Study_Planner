@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./ProfilePage.css";
+import { api } from "../api/client";
 
 function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
+  const [showFullImage, setShowFullImage] = useState(false);
 
   // Profile picture
   const [profileImage, setProfileImage] = useState(null);
@@ -59,7 +61,7 @@ function ProfilePage() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const data = await api.getStudentProfile(STUDENT_ID);
+        const data = await api.getStudentProfile();
 
         setProfile({
           fullName: data.full_name || "",
@@ -217,15 +219,57 @@ function ProfilePage() {
   );
 
   // Save profile
-  const handleSave = () => {
-    const missingFields = requiredFields.filter(
-      (field) => !String(profile[field] || "").trim()
-    );
+const handleSave = async () => {
+  const missingFields = requiredFields.filter(
+    (field) => !String(profile[field] || "").trim()
+  );
 
-    if (missingFields.length > 0) {
-      alert("Please complete all mandatory fields.");
-      return;
-    }
+  if (missingFields.length > 0) {
+    alert("Please complete all mandatory fields.");
+    return;
+  }
+
+  const profileData = {
+    full_name: profile.fullName,
+    phone: profile.phone,
+    dob: profile.dob,
+    gender: profile.gender,
+    address: profile.address,
+
+    category: profile.category,
+
+    school_name: profile.schoolName,
+    school_board: profile.schoolBoard,
+    class_level: profile.classLevel,
+
+    college: profile.college,
+    department: profile.department,
+    course: profile.course,
+    semester: profile.semester,
+
+    institution_name: profile.institutionName,
+    program_name: profile.programName,
+    study_year: profile.studyYear,
+
+    research_program: profile.researchProgram,
+    research_area: profile.researchArea,
+    supervisor_name: profile.supervisorName,
+
+    current_study_level: profile.currentStudyLevel,
+    academic_year: profile.academicYear,
+    roll_number: profile.rollNumber,
+
+    profile_picture_url: profileImage,
+  };
+
+  try {
+    const updatedProfile = await api.updateStudentProfile(profileData);
+
+    setProfile((prev) => ({
+      ...prev,
+      fullName: updatedProfile.full_name || "",
+      email: updatedProfile.email || "",
+    }));
 
     stopCamera();
     cancelImagePreview();
@@ -233,9 +277,11 @@ function ProfilePage() {
     setIsEditing(false);
 
     alert("Profile saved successfully!");
-
-    // Backend database integration will be added later.
-  };
+  } catch (error) {
+    console.error("Profile saving error:", error);
+    alert("Unable to save your profile: " + error.message);
+  }
+};
 
   // Cancel editing
   const handleCancel = () => {
@@ -468,6 +514,7 @@ function ProfilePage() {
   };
 
   return (
+    <>
     <div className="profile-page">
 
       {/* Page Header */}
@@ -499,7 +546,16 @@ function ProfilePage() {
           {/* Profile Picture */}
           <div className="profile-picture-section">
 
-            <div className="profile-avatar">
+            <div
+              className="profile-avatar"
+              onClick={() => {
+                if (imagePreview || profileImage) {
+                  setShowFullImage(true);
+                }
+              }}
+              title="View full profile picture"
+              style={{ cursor: imagePreview || profileImage ? "zoom-in" : "default" }}
+            >
               {imagePreview || profileImage ? (
                 <img
                   src={imagePreview || profileImage}
@@ -650,7 +706,18 @@ function ProfilePage() {
 
               {renderInput("Full Name", "fullName", "text", true)}
 
-              {renderInput("Email Address", "email", "email", true)}
+              <div className="profile-field">
+  <label>
+    Email Address <span className="required">*</span>
+  </label>
+
+  <input
+    type="email"
+    name="email"
+    value={profile.email}
+    disabled
+  />
+</div>
 
               {renderInput("Phone Number", "phone", "tel")}
 
@@ -876,6 +943,28 @@ function ProfilePage() {
         </div>
       </div>
     </div>
+
+    { showFullImage && (imagePreview || profileImage) && (
+      <div
+        className="profile-image-modal"
+        onClick={() => setShowFullImage(false)}
+      >
+        <button
+          className="profile-image-close"
+          onClick={() => setShowFullImage(false)}
+          aria-label="Close image"
+        >
+        ×
+        </button>
+
+        <img
+          src={imagePreview || profileImage}
+          alt="Full profile"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    )}
+    </>
   );
 }
 

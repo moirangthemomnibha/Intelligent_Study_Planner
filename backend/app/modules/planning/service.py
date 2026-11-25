@@ -20,6 +20,8 @@ from app.planning.scheduler import build_schedule
 
 from app.modules.planning.models import PlanSettings
 from app.modules.sessions.models import StudySession
+from app.modules.topics.models import Topic
+from app.modules.subjects.models import Subject
 
 
 # ==================================================
@@ -27,9 +29,7 @@ from app.modules.sessions.models import StudySession
 # ==================================================
 
 def generate_topic_reason(topic: dict) -> str:
-    """
-    Explain why a topic received its priority.
-    """
+    """Explain why a topic received its priority."""
 
     reasons = []
 
@@ -59,25 +59,20 @@ def generate_plan(
     topics: list[dict],
     available_minutes: int,
     days: int,
-    start_date: date | None = None
+    start_date: date | None = None,
+    preferred_times: list | None = None
 ) -> list[dict]:
-    """
-    Calculate topic priorities and generate a study schedule.
-    """
 
     ranked_topics = []
 
     for topic in topics:
-
         priority_score = calculate_priority(topic)
 
-        ranked_topic = {
+        ranked_topics.append({
             **topic,
             "priority_score": priority_score,
             "reason": generate_topic_reason(topic)
-        }
-
-        ranked_topics.append(ranked_topic)
+        })
 
     ranked_topics.sort(
         key=lambda topic: topic["priority_score"],
@@ -85,10 +80,11 @@ def generate_plan(
     )
 
     return build_schedule(
-        ranked_topics,
-        available_minutes,
-        days,
-        start_date
+        topics=ranked_topics,
+        available_minutes=available_minutes,
+        days=days,
+        start_date=start_date,
+        preferred_times=preferred_times
     )
 
 
@@ -100,9 +96,7 @@ def get_plan_settings(
     session: Session,
     student_id: int
 ):
-    """
-    Retrieve existing planning settings.
-    """
+    """Retrieve existing planning settings."""
 
     return session.exec(
         select(PlanSettings).where(
@@ -121,9 +115,7 @@ def save_plan_settings(
     start: date,
     days: int
 ):
-    """
-    Create or update planning settings.
-    """
+    """Create or update planning settings."""
 
     settings = get_plan_settings(
         session,
@@ -169,15 +161,52 @@ def persist_generated_sessions(
     period are replaced.
 
     Completed, missed and partial sessions are preserved.
+
+    Every topic must belong to the specified student.
     """
 
     saved_sessions = []
+
+    if days < 1:
+        raise ValueError("Planning period must be at least one day.")
 
     end_date = start_date + timedelta(days=days - 1)
 
     try:
 
-        # Find existing planned sessions in this period.
+        # ------------------------------------------
+        # VERIFY TOPIC OWNERSHIP
+        # ------------------------------------------
+
+        owned_topics = session.exec(
+            select(Topic)
+            .join(
+                Subject,
+                Topic.subject_id == Subject.id
+            )
+            .where(
+                Subject.student_id == student_id
+            )
+        ).all()
+
+        owned_topic_ids = {
+            topic.id for topic in owned_topics
+        }
+
+        for item in generated_plan:
+
+            topic_id = item.get("topic_id")
+
+            if topic_id not in owned_topic_ids:
+                raise ValueError(
+                    "Cannot save a study session for a topic "
+                    "that does not belong to this student."
+                )
+
+        # ------------------------------------------
+        # FIND EXISTING PLANNED SESSIONS
+        # ------------------------------------------
+
         statement = select(StudySession).where(
             StudySession.student_id == student_id,
             StudySession.status == "planned",
@@ -187,11 +216,17 @@ def persist_generated_sessions(
 
         existing_sessions = session.exec(statement).all()
 
-        # Remove only old planned sessions.
+        # ------------------------------------------
+        # REMOVE ONLY OLD PLANNED SESSIONS
+        # ------------------------------------------
+
         for old_session in existing_sessions:
             session.delete(old_session)
 
-        # Insert newly generated sessions.
+        # ------------------------------------------
+        # INSERT NEW GENERATED SESSIONS
+        # ------------------------------------------
+
         for item in generated_plan:
 
             study_session = StudySession(
@@ -207,7 +242,10 @@ def persist_generated_sessions(
             session.add(study_session)
             saved_sessions.append(study_session)
 
-        # Commit all changes together.
+        # ------------------------------------------
+        # COMMIT CHANGES
+        # ------------------------------------------
+
         session.commit()
 
         for study_session in saved_sessions:
@@ -229,9 +267,7 @@ def get_student_sessions(
     session: Session,
     student_id: int
 ) -> list[StudySession]:
-    """
-    Retrieve all study sessions belonging to a student.
-    """
+    """Retrieve all study sessions belonging to a student."""
 
     statement = select(StudySession).where(
         StudySession.student_id == student_id

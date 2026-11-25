@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.database.session import create_db_and_tables
+from app.modules.settings.router import router as settings_router
 
 # Import application routers
 from app.modules.students.router import router as students_router
@@ -13,6 +14,7 @@ from app.modules.sessions.router import router as sessions_router
 from app.modules.ai.router import router as ai_router
 from app.modules.agent.router import router as agent_router
 from app.modules.auth.router import router as auth_router
+from app.modules.tasks.router import router as tasks_router
 
 # Create FastAPI application
 app = FastAPI(
@@ -50,12 +52,18 @@ routers = [
     ai_router,
     agent_router,
     auth_router,
+    tasks_router,
+    settings_router,
 ]
 
 for feature_router in routers:
     app.include_router(
         feature_router,
         prefix="/api/v1",
+    )
+    app.include_router(
+        tasks_router,
+        prefix="/api/v1"
     )
 
 

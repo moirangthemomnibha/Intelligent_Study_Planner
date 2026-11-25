@@ -1,5 +1,8 @@
 """Business logic for authentication."""
 
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from app.modules.students.models import Student
 import secrets
 import hashlib
 import smtplib
@@ -23,12 +26,50 @@ from app.modules.auth.schemas import (
 )
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# PBKDF2-SHA256 is the default.
+# Existing bcrypt hashes remain supported.
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256", "bcrypt"],
+    deprecated=["bcrypt"],
+    pbkdf2_sha256__rounds=600000,
+)
 
 
 # ------------------------------------------
 # PASSWORD UTILITIES
 # ------------------------------------------
+
+def validate_password(password: str):
+    """Validate password strength."""
+
+    if len(password) < 8:
+        raise ValueError(
+            "Password must contain at least 8 characters."
+        )
+
+    if not any(char.isupper() for char in password):
+        raise ValueError(
+            "Password must contain at least one uppercase letter."
+        )
+
+    if not any(char.islower() for char in password):
+        raise ValueError(
+            "Password must contain at least one lowercase letter."
+        )
+
+    if not any(char.isdigit() for char in password):
+        raise ValueError(
+            "Password must contain at least one number."
+        )
+
+    if not any(
+        not char.isalnum() and not char.isspace()
+        for char in password
+    ):
+        raise ValueError(
+            "Password must contain at least one special character."
+        )
+
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -106,7 +147,7 @@ def create_and_send_otp(
     record = EmailOTP(
         email=email,
         otp_hash=hash_otp(otp),
-        expires_at=datetime.now(timezone.utc).replace(tzinfo=None)
+        expires_at=datetime.now(timezone.utc)
         + timedelta(minutes=settings.otp_expire_minutes),
     )
 
@@ -131,9 +172,15 @@ def verify_otp_record(
     if not record:
         raise ValueError("Invalid or expired verification code.")
 
-    current_time = datetime.now(timezone.utc).replace(tzinfo=None)
+    current_time = datetime.now(timezone.utc)
 
-    if record.expires_at < current_time:
+    expires_at = record.expires_at
+
+    # SQLite may return datetime values without timezone information.
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at < current_time:
         raise ValueError("Verification code has expired.")
 
     if not secrets.compare_digest(
@@ -189,6 +236,8 @@ def register_user(
     session: Session,
     data: RegisterRequest,
 ):
+    validate_password(data.password)
+
     email = str(data.email).lower()
 
     existing = session.exec(
@@ -245,12 +294,32 @@ def verify_email_otp(
         verify_otp_record(session, email, data.otp)
 
         user.is_verified = True
-
         session.add(user)
+        session.flush()
+
+        student = session.exec(
+            select(Student).where(Student.user_id == user.id)
+        ).first()
+
+        if not student:
+            student = session.exec(
+                select(Student).where(Student.email == email)
+            ).first()
+
+        if student:
+            student.user_id = user.id
+        else:
+            student = Student(
+                user_id=user.id,
+                full_name="",
+                email=email,
+            )
+
+        session.add(student)
         session.commit()
         session.refresh(user)
 
-        return {"message": "Email verified successfully."}
+        return {"message": "Email verified and student profile created."}
 
     except Exception:
         session.rollback()
@@ -278,10 +347,25 @@ def resend_email_otp(
         raise ValueError("Email is already verified.")
 
     try:
+        # Mark previous unused OTPs as used
+        old_otps = session.exec(
+            select(EmailOTP)
+            .where(EmailOTP.email == email)
+            .where(EmailOTP.is_used == False)
+        ).all()
+
+        for old_otp in old_otps:
+            old_otp.is_used = True
+            session.add(old_otp)
+
+        # Generate and send a fresh OTP
         create_and_send_otp(session, email)
+
         session.commit()
 
-        return {"message": "Verification code sent successfully."}
+        return {
+            "message": "A new verification code has been sent."
+        }
 
     except Exception:
         session.rollback()
@@ -307,6 +391,13 @@ def login_user(
         user.hashed_password,
     ):
         raise ValueError("Invalid email or password.")
+
+    # Automatically upgrade old bcrypt hashes
+    # to PBKDF2-SHA256 after successful login.
+    if pwd_context.needs_update(user.hashed_password):
+        user.hashed_password = hash_password(data.password)
+        session.add(user)
+        session.commit()
 
     if not user.is_verified:
         raise ValueError("Please verify your email before logging in.")
@@ -360,6 +451,8 @@ def reset_password(
     session: Session,
     data: ResetPasswordRequest,
 ):
+    validate_password(data.new_password)
+
     email = str(data.email).lower()
 
     user = session.exec(
@@ -378,6 +471,83 @@ def reset_password(
         session.commit()
 
         return {"message": "Password reset successfully."}
+
+    except Exception:
+        session.rollback()
+        raise
+
+# ------------------------------------------
+# GOOGLE AUTHENTICATION
+# ------------------------------------------
+
+def google_login(session: Session, credential: str):
+    if not settings.google_client_id:
+        raise ValueError("Google authentication is not configured.")
+
+    try:
+        google_user = id_token.verify_oauth2_token(
+            credential,
+            google_requests.Request(),
+            settings.google_client_id,
+        )
+    except Exception:
+        raise ValueError("Invalid Google authentication. Please try again.")
+
+    email = google_user.get("email", "").lower()
+
+    if not email or not google_user.get("email_verified"):
+        raise ValueError("Google email is not verified.")
+
+    user = session.exec(
+        select(User).where(User.email == email)
+    ).first()
+
+    try:
+        if user:
+            if not user.is_active:
+                raise ValueError("This account is inactive.")
+            user.is_verified = True
+        else:
+            user = User(
+                email=email,
+                hashed_password=hash_password(
+                    secrets.token_urlsafe(48)
+                ),
+                is_verified=True,
+                is_active=True,
+            )
+            session.add(user)
+            session.flush()
+
+        student = session.exec(
+            select(Student).where(Student.user_id == user.id)
+        ).first()
+
+        if not student:
+            student = session.exec(
+                select(Student).where(Student.email == email)
+            ).first()
+
+        if student:
+            student.user_id = user.id
+        else:
+            student = Student(
+                user_id=user.id,
+                full_name="",
+                email=email,
+            )
+
+        session.add(student)
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
+        return {
+            "access_token": create_access_token(user.id, user.email),
+            "token_type": "bearer",
+            "user_id": user.id,
+            "email": user.email,
+        }
 
     except Exception:
         session.rollback()
