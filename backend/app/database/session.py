@@ -36,7 +36,11 @@ def run_sqlite_migrations():
             "enable_revision": "BOOLEAN NOT NULL DEFAULT 1",
             "revision_interval_days": "INTEGER NOT NULL DEFAULT 3",
             "buffer_minutes": "INTEGER NOT NULL DEFAULT 30",
-        }
+        },
+
+        "agentconversation": {
+            "summary": "TEXT",
+},
     }
 
     with engine.begin() as connection:
@@ -83,6 +87,11 @@ def create_db_and_tables():
     from app.modules.planning.models import PlanSettings
     from app.modules.auth.models import User, EmailOTP
     from app.modules.tasks.models import Task
+
+    from app.modules.agent.conversation_models import (
+        AgentConversation,
+        AgentMessage,
+    )
 
     SQLModel.metadata.create_all(engine)
 

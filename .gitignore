@@ -34,3 +34,4 @@ dist/
 # Logs and build files
 *.log
 build/
+venv_backup/

@@ -9,3 +9,7 @@ email-validator
 python-multipart
 pytest
 httpx
+openai
+pypdf
+python-docx
+python-pptx

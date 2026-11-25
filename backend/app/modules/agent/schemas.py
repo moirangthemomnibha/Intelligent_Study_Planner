@@ -6,6 +6,7 @@ from typing import Literal
 class AgentRequest(BaseModel):
     student_id: int
     intent: str
+
     approval_mode: Literal[
         "suggest_only",
         "ask_before_changes"
@@ -17,8 +18,8 @@ class AgentRequest(BaseModel):
 
 class AgentProposal(BaseModel):
     summary: str
-    actions: list[dict]
-    requires_confirmation: bool = True
+    actions: list[dict] = Field(default_factory=list)
+    requires_confirmation: bool = False
 
 
 class AgentConfirmRequest(BaseModel):
@@ -27,3 +28,14 @@ class AgentConfirmRequest(BaseModel):
     horizon_days: int = Field(ge=1, le=30)
     available_minutes_per_day: int = Field(gt=0)
     generated_plan: list[dict]
+
+
+class AgentChatRequest(BaseModel):
+    student_id: int
+    message: str = Field(min_length=1, max_length=10000)
+    conversation_history: list[dict] = Field(default_factory=list)
+
+class AgentChatResponse(BaseModel):
+    success: bool
+    response: str
+    actions: list[dict] = Field(default_factory=list)

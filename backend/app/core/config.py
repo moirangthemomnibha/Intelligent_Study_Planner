@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     ai_provider_api_key: str | None = None
     ai_model: str | None = None
 
+    openai_api_key: str | None = None
+    ai_model: str = "gpt-5.4"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",
